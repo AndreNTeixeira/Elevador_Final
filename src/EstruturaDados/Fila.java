@@ -1,3 +1,5 @@
+package EstruturaDados;
+
 public class Fila {
     private Ponteiro inicio;
     private Ponteiro fim;
@@ -17,12 +19,18 @@ public class Fila {
         fim = novo;
     }
 
-    public Object desenfileirar() {
-        if (inicio == null) return null;
-        Object elemento = inicio.getElemento();
-        inicio = inicio.getProximo();
-        if (inicio == null) fim = null;
-        return elemento;
+    public void desenfileirar() {
+        if (inicio == null) {
+            return; // fila já vazia
+        }
+
+        if (inicio == fim) { //1 elevemnto
+            inicio = null;
+            fim = null;
+        } else {
+            Ponteiro atual = inicio; //retira o primeiro da fila FIFO
+            inicio = inicio.getProximo();
+        }
     }
 
     public boolean estaVazia() {

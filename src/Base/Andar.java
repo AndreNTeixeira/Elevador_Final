@@ -1,3 +1,10 @@
+package Base;
+
+import EstruturaDados.Fila;
+import EstruturaDados.Lista;
+import EstruturaDados.Ponteiro;
+import Simulacao.PainelElevador;
+
 import java.io.Serializable;
 
 public class Andar implements Serializable {

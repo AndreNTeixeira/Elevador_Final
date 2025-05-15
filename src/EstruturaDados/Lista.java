@@ -1,10 +1,12 @@
+package EstruturaDados;
+
 public class Lista {
     private Ponteiro inicio;
     private Ponteiro fim;
 
-    private int contarLista(Lista lista) { //fazer a contagem do numero de pessoas nos andares
+    public int tamanho() { //fazer a contagem do numero de pessoas nos andares
         int count = 0;
-        Ponteiro p = lista.getInicio();
+        Ponteiro p = getInicio();
         while (p != null) {
             count++;
             p = p.getProximo();
@@ -26,6 +28,22 @@ public class Lista {
         }
         fim = novo;
     }
+
+    public Object getElementoNaPosicao(int posicao) {
+        int contador = 0;
+        Ponteiro atual = inicio;
+
+        while (atual != null) {
+            if (contador == posicao) {
+                return atual.getElemento();
+            }
+            atual = atual.getProximo();
+            contador++;
+        }
+
+        return null; // se não encontrar
+    }
+
 
     public Ponteiro getInicio() {
         return inicio;

@@ -1,3 +1,12 @@
+package Simulacao;
+
+import Base.Andar;
+import Base.Elevador;
+import Base.Pessoa;
+import EstruturaDados.Fila;
+import EstruturaDados.Lista;
+import EstruturaDados.Ponteiro;
+
 public class CentralDeControle extends EntidadeSimulavel {
     private Lista elevadores;
     private Lista andares;
@@ -37,9 +46,7 @@ public class CentralDeControle extends EntidadeSimulavel {
 
         if (andarAtual == 0) {
             andar.embarcarPessoas(elevador);
-        }
-
-        else {
+        } else {
             Fila filaAguardando = andar.getPessoasAguardando();
             Ponteiro p = filaAguardando.getInicio();
             while (p != null && elevador.getCapacidadeDisponivel() > 0) {

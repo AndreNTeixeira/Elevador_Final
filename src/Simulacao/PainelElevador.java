@@ -1,3 +1,7 @@
+package Simulacao;
+
+import EstruturaDados.Lista;
+
 import java.io.Serializable;
 
 public class PainelElevador implements Serializable {

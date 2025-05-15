@@ -1,3 +1,9 @@
+package Base;
+
+import EstruturaDados.Lista;
+import EstruturaDados.Ponteiro;
+import Simulacao.EntidadeSimulavel;
+
 public class Elevador extends EntidadeSimulavel {
     private int id;
     private int andarAtual = 0;
@@ -52,13 +58,13 @@ public class Elevador extends EntidadeSimulavel {
 
     private void mover() {
         if (getQuantidadePassageiros() == 0) {
-            // Elevador vazio → desce para o térreo
+            // Base.Elevador vazio → desce para o térreo
             if (andarAtual > 0) {
                 andarAtual--;
             }
             // Se já estiver no térreo, não faz nada
         } else {
-            // Elevador com passageiros → segue lógica normal
+            // Base.Elevador com passageiros → segue lógica normal
             if (subindo) {
                 if (andarAtual < andarMaximo) {
                     andarAtual++;

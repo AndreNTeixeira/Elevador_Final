@@ -1,3 +1,5 @@
+package Simulacao;
+
 import java.io.Serializable;
 
 public abstract class EntidadeSimulavel implements Serializable {

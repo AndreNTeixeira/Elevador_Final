@@ -1,6 +1,12 @@
+package Simulacao;
+
+import Base.Andar;
+import Base.Pessoa;
+import Base.Predio;
+import EstruturaDados.Ponteiro;
+
 import java.io.*;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,38 +18,19 @@ public class Simulador implements Serializable {
     private Predio predio;
     private int totalPessoas;
 
-    public void iniciar() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Digite a quantidade de andares: ");
-        int andares = scanner.nextInt();
-        if (andares < 5) {
-            System.out.println("O valor da andares deve ser maior que 5");
-            return;
-        }
-
-        System.out.print("Digite a quantidade de elevadores: ");
-        int elevadores = scanner.nextInt();
-        if (elevadores < 2) {
-            System.out.println("O valor de elevadores deve ser maior que 2");
-            return;
-        }
-
-        System.out.print("Digite a velocidade da simulação (em milissegundos): ");
-        this.velocidadeEmMs = scanner.nextInt();
-
-        System.out.print("Digite a quantidade de pessoas iniciais: ");
-        this.totalPessoas = scanner.nextInt();
-
+    public void configurar(int andares, int elevadores, int pessoas, int velocidadeEmMs) {
+        this.velocidadeEmMs = velocidadeEmMs;
+        this.totalPessoas = pessoas;
         this.predio = new Predio(andares, elevadores);
         gerarPessoasIniciais();
-
-        this.minutoSimulado = 0;
-        emExecucao = true;
-        iniciarTimer();
-
-        System.out.println("Simulação iniciada.");
     }
+
+    public void iniciarSimulacao() {
+        this.minutoSimulado = 0;
+        this.emExecucao = true;
+        iniciarTimer();
+    }
+
 
     private void iniciarTimer() {
         timer = new Timer();
@@ -127,4 +114,13 @@ public class Simulador implements Serializable {
             return null;
         }
     }
+
+    public Predio getPredio() {
+        return predio;
+    }
+
+    public int getMinutoAtual() {
+        return minutoSimulado;
+    }
+
 }

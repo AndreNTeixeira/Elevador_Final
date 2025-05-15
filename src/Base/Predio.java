@@ -1,3 +1,10 @@
+package Base;
+
+import EstruturaDados.Lista;
+import EstruturaDados.Ponteiro;
+import Simulacao.CentralDeControle;
+import Simulacao.EntidadeSimulavel;
+
 public class Predio extends EntidadeSimulavel {
     private CentralDeControle central;
     private Lista andares;

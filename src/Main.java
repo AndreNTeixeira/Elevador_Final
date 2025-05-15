@@ -1,8 +1,6 @@
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
-        Simulador simulador = new Simulador();
+    /*    Simulador simulador = new Simulador();
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -27,5 +25,5 @@ public class Main {
             }
 
         } while (opcao != 0);
-    }
+    */}
 }

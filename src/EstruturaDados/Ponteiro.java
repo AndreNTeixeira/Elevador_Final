@@ -1,3 +1,5 @@
+package EstruturaDados;
+
 public class Ponteiro {
     private Object elemento;
     private Ponteiro proximo;
