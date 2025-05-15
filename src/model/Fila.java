@@ -36,4 +36,14 @@ public class Fila {
     public Ponteiro getInicio() {
         return inicio;
     }
+
+    public int getTamanho() {
+        int count = 0;
+        Ponteiro p = inicio;
+        while (p != null) {
+            count++;
+            p = p.getProximo();
+        }
+        return count;
+    }
 }

@@ -17,9 +17,17 @@ public class Simulador implements Serializable {
 
         System.out.print("Digite a quantidade de andares: ");
         int andares = scanner.nextInt();
+        if (andares < 5) {
+            System.out.println("O valor da andares deve ser maior que 5");
+            return;
+        }
 
         System.out.print("Digite a quantidade de elevadores: ");
         int elevadores = scanner.nextInt();
+        if (elevadores < 2) {
+            System.out.println("O valor de elevadores deve ser maior que 2");
+            return;
+        }
 
         System.out.print("Digite a velocidade da simulação (em milissegundos): ");
         this.velocidadeEmMs = scanner.nextInt();
