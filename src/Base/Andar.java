@@ -36,13 +36,14 @@ public class Andar implements Serializable {
         return painel;
     }
 
-    public void adicionarPessoa(Pessoa pessoa) {
+    public void adicionarPessoa(Pessoa pessoa, int minutoAtual) {
         pessoasAguardando.enfileirar(pessoa);
+        pessoa.registrarTempoEntradaFila(minutoAtual);
         painel.registrarChamada(pessoa.getAndarDestino()); // Ex: registra destino no painel
         System.out.println("Pessoa " + pessoa.getId() + " adicionada no andar " + numero + " com destino ao " + pessoa.getAndarDestino());
     }
 
-    public void embarcarPessoas(Elevador elevador) {
+    public void embarcarPessoas(Elevador elevador, int minutoAtual) {
         Ponteiro atual = pessoasAguardando.getInicio();
 
         while (atual != null && elevador.getCapacidadeDisponivel() > 0) {
@@ -52,7 +53,7 @@ public class Andar implements Serializable {
                     (!elevador.isSubindo() && pessoa.getAndarDestino() < numero);
 
             if (pessoa.getAndarOrigem() == numero && mesmaDirecao) {
-                elevador.adicionarPassageiro(pessoa);
+                elevador.adicionarPassageiro(pessoa, minutoAtual);
                 pessoasAguardando.desenfileirar();
             }
 
@@ -82,7 +83,7 @@ public class Andar implements Serializable {
             if (minutoAtual - pessoa.getTempoChegada() >= 3) { // ficou 3 minutos no andar
                 pessoa.setAndarOrigem(numero);
                 pessoa.setAndarDestino(0); // térreo
-                adicionarPessoa(pessoa); // volta para a fila de espera
+                adicionarPessoa(pessoa, minutoAtual); // volta para a fila de espera
                 painel.registrarChamada(0);
                 System.out.println("Pessoa " + pessoa.getId() + " quer retornar ao térreo.");
 
