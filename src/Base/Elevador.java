@@ -58,32 +58,31 @@ public class Elevador extends EntidadeSimulavel {
 
     private void mover() {
         if (getQuantidadePassageiros() == 0) {
-            // Base.Elevador vazio → desce para o térreo
+            // Elevador vazio → desce para o térreo
             if (andarAtual > 0) {
+                subindo = false;
                 andarAtual--;
             }
-            // Se já estiver no térreo, não faz nada
+            // Se já estiver no térreo, permanece parado
         } else {
-            // Base.Elevador com passageiros → segue lógica normal
+            // Atualiza direção antes de mover
+            if (subindo && andarAtual == andarMaximo) {
+                subindo = false;
+            } else if (!subindo && andarAtual == 0) {
+                subindo = true;
+            }
+
+            // Move conforme a direção
             if (subindo) {
-                if (andarAtual < andarMaximo) {
-                    andarAtual++;
-                } else {
-                    subindo = false;
-                    andarAtual--; // começa a descer
-                }
+                andarAtual++;
             } else {
-                if (andarAtual > 0) {
-                    andarAtual--;
-                } else {
-                    subindo = true;
-                    andarAtual++; // começa a subir novamente
-                }
+                andarAtual--;
             }
         }
 
         System.out.println("Elevador " + id + " está no andar " + andarAtual +
-                " com " + getQuantidadePassageiros() + " passageiros.");
+                " com " + getQuantidadePassageiros() + " passageiros. " +
+                (subindo ? "Subindo ↑" : "Descendo ↓"));
     }
 
     @Override

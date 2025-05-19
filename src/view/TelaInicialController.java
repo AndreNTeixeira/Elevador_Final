@@ -179,7 +179,7 @@ public class TelaInicialController {
             gradePredio.getColumnConstraints().add(col);
         }
 
-        for (int j = 0; j < andares; j++) {
+        for (int j = 0; j <= andares; j++) {
             RowConstraints row = new RowConstraints();
             row.setPrefHeight(alturaCelula);
             row.setMinHeight(alturaCelula);
@@ -193,8 +193,8 @@ public class TelaInicialController {
                     .getElevadores()
                     .getElementoNaPosicao(col);
 
-            for (int row = 0; row < andares; row++) {
-                int andarInvertido = andares - row - 1;
+            for (int row = 0; row <= andares; row++) {
+                int andarInvertido = andares - row;
                 StackPane celula = criarCelulaElevador(elevador, andarInvertido);
                 gradePredio.add(celula, col, row);
             }
@@ -249,7 +249,7 @@ public class TelaInicialController {
                 if (andar == andarAtual) {
                     fundo.setFill(Color.GOLD);
                     String dir = subindo ? "↑" : "↓";
-                    texto.setText("P:" + capacidade + "\n" + dir);
+                    texto.setText("P: " + capacidade + " " + dir);
                 } else {
                     fundo.setFill(Color.LIGHTGRAY);
                     texto.setText("");
