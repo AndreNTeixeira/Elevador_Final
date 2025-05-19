@@ -22,7 +22,7 @@ public class Simulador implements Serializable {
         this.velocidadeEmMs = velocidadeEmMs;
         this.totalPessoas = pessoas;
         this.predio = new Predio(andares, elevadores);
-        gerarPessoasIniciais();
+        gerarPessoasIniciais(minutoSimulado);
     }
 
     public void iniciarSimulacao() {
@@ -63,7 +63,7 @@ public class Simulador implements Serializable {
         System.out.println("Simulação encerrada.");
     }
 
-    private void gerarPessoasIniciais() {
+    private void gerarPessoasIniciais(int minutoAtual) {
         Andar terreo = getAndar(0);
         Random random = new Random();
         int quantidadeAndares = getQuantidadeAndares();
@@ -71,7 +71,7 @@ public class Simulador implements Serializable {
         for (int i = 0; i < totalPessoas; i++) {
             int destino = random.nextInt(quantidadeAndares - 1) + 1; // de 1 até N-1
             Pessoa p = new Pessoa(i + 1, 0, destino);
-            terreo.adicionarPessoa(p);
+            terreo.adicionarPessoa(p, minutoAtual);
         }
     }
 

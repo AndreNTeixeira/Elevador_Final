@@ -6,6 +6,7 @@ import Base.Pessoa;
 import EstruturaDados.Fila;
 import EstruturaDados.Lista;
 import EstruturaDados.Ponteiro;
+import Metricas.MetricasElevador;
 
 public class CentralDeControle extends EntidadeSimulavel {
     private Lista elevadores;
@@ -32,27 +33,50 @@ public class CentralDeControle extends EntidadeSimulavel {
         while (pElevador != null) {
             Elevador elevador = (Elevador) pElevador.getElemento();
 
-            processarTarefaElevador(elevador);
+            processarTarefaElevador(elevador, minutoSimulado);
 
             elevador.atualizar(minutoSimulado);
 
             pElevador = pElevador.getProximo();
         }
+        if (minutoSimulado % 60==0){
+            exibirMetricas(minutoSimulado);
+        }
     }
 
-    private void processarTarefaElevador(Elevador elevador) {
+    private void exibirMetricas(int minutoSimulado){
+        System.out.println("\n=== METRICAS DOS ELEVADORES (Minuto" + minutoSimulado + ") ===");
+
+        Ponteiro pElevador = elevadores.getInicio();
+        while (pElevador != null){
+            Elevador elevador = (Elevador) pElevador.getElemento();
+            MetricasElevador metricas = elevador.getMetricas();
+
+            System.out.println("Elevador "+ elevador.getId()+ ":");
+            System.out.println("  - Energia total gasta: " + metricas.getEnergiaTotalGasta() + " unidades");
+            System.out.println("  - Tempo em movimento: " + metricas.getTempoTotalMovimentacao() + " minutos");
+            System.out.println("  - Tempo parado: " + metricas.getTempoTotalParado() + " minutos");
+            System.out.println("  - Número de viagens: " + metricas.getNumeroViagens());
+            System.out.println("  - Pessoas transportadas: " + metricas.getNumeroPessoasTransportadas());
+
+            pElevador = pElevador.getProximo();
+        }
+        System.out.println("============================\n");
+    }
+
+    private void processarTarefaElevador(Elevador elevador, int minutoAtual) {
         int andarAtual = elevador.getAndarAtual();
         Andar andar = (Andar) getAndar(andarAtual);
 
         if (andarAtual == 0) {
-            andar.embarcarPessoas(elevador);
+            andar.embarcarPessoas(elevador, minutoAtual);
         } else {
             Fila filaAguardando = andar.getPessoasAguardando();
             Ponteiro p = filaAguardando.getInicio();
             while (p != null && elevador.getCapacidadeDisponivel() > 0) {
                 Pessoa pessoa = (Pessoa) p.getElemento();
                 if (!pessoa.estaDentroDoElevador()) {
-                    elevador.adicionarPassageiro(pessoa);
+                    elevador.adicionarPassageiro(pessoa, minutoAtual);
                     filaAguardando.desenfileirar();
                     System.out.println("Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual + " para voltar ao térreo");
                 }
