@@ -7,15 +7,18 @@ import EstruturaDados.Fila;
 import EstruturaDados.Lista;
 import EstruturaDados.Ponteiro;
 import Metricas.MetricasElevador;
+import controle.HeuristicaControle;
 
 public class CentralDeControle extends EntidadeSimulavel {
     private Lista elevadores;
     private Lista andares;
     private int andarMaximo;
+    private HeuristicaControle heuristica;
 
 
-    public CentralDeControle(int quantidadeElevadores, int andarMaximo) {
+    public CentralDeControle(int quantidadeElevadores, int andarMaximo, HeuristicaControle heur) {
         this.andarMaximo = andarMaximo;
+        this.heuristica = heur;
         elevadores = new Lista();
         for (int i = 0; i < quantidadeElevadores; i++) {
             elevadores.inserirFim(new Elevador(i + 1, andarMaximo));
@@ -28,6 +31,7 @@ public class CentralDeControle extends EntidadeSimulavel {
 
     @Override
     public void atualizar(int minutoSimulado) {
+        heuristica.decidir(elevadores, andares, minutoSimulado);
         Ponteiro pElevador = elevadores.getInicio();
 
         while (pElevador != null) {

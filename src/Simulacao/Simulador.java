@@ -4,6 +4,7 @@ import Base.Andar;
 import Base.Pessoa;
 import Base.Predio;
 import EstruturaDados.Ponteiro;
+import controle.HeuristicaControle;
 
 import java.io.*;
 import java.util.Random;
@@ -18,10 +19,12 @@ public class Simulador implements Serializable {
     private Predio predio;
     private int totalPessoas;
 
-    public void configurar(int andares, int elevadores, int pessoas, int velocidadeEmMs) {
+
+    public void configurar(int andares, int elevadores, int pessoas, int velocidadeEmMs, HeuristicaControle heuristica) {
         this.velocidadeEmMs = velocidadeEmMs;
         this.totalPessoas = pessoas;
-        this.predio = new Predio(andares, elevadores);
+        this.predio = new Predio(andares, elevadores, heuristica);
+        System.out.println("Heurística selecionada: " + heuristica.getClass().getSimpleName());
         gerarPessoasIniciais(minutoSimulado);
     }
 
@@ -61,6 +64,26 @@ public class Simulador implements Serializable {
         if (timer != null) timer.cancel();
         emExecucao = false;
         System.out.println("Simulação encerrada.");
+
+        // Relatório final
+        System.out.println("\n========= RELATÓRIO FINAL =========");
+        Ponteiro pElev = predio.getCentral().getElevadores().getInicio();
+        while (pElev != null) {
+            Base.Elevador e = (Base.Elevador) pElev.getElemento();
+            Metricas.MetricasElevador m = e.getMetricas();
+            System.out.printf(
+                    "Elevador %d | Viagens: %d | Pessoas: %d | Energia: %d | " +
+                            "Movimentação: %d min | Parado: %d min%n",
+                    e.getId(),
+                    m.getNumeroViagens(),
+                    m.getNumeroPessoasTransportadas(),
+                    m.getEnergiaTotalGasta(),
+                    m.getTempoTotalMovimentacao(),
+                    m.getTempoTotalParado()
+            );
+            pElev = pElev.getProximo();
+        }
+        System.out.println("===================================\n");
     }
 
     private void gerarPessoasIniciais(int minutoAtual) {

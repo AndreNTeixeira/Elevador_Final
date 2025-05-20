@@ -54,4 +54,11 @@ public class Fila {
         }
         return count;
     }
+
+    public void setInicio(Ponteiro proximo) {
+    }
+
+    public void setFim(Ponteiro anterior) {
+
+    }
 }

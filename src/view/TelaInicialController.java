@@ -2,8 +2,7 @@ package view;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -12,16 +11,26 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import Base.Elevador;
 import EstruturaDados.Ponteiro;
 import Simulacao.Simulador;
-import javafx.scene.control.Alert;
-import java.util.HashMap;
-import java.util.Map;
+
+import controle.HeuristicaControle;
+import controle.HeuristicaSemOtimizacao;
+import controle.HeuristicaTempo;
+import controle.HeuristicaEnergia;
+
 
 public class TelaInicialController {
 
     @FXML private javafx.scene.control.Label labelTempo;
+    @FXML private RadioButton radioEnergia;
+    @FXML private RadioButton radioTempo;
+    @FXML private RadioButton radioSem;
     @FXML private TextField inputAndares;
     @FXML private TextField inputElevadores;
     @FXML private TextField inputPessoas;
@@ -95,6 +104,16 @@ public class TelaInicialController {
             return;
         }
 
+        //selecionar heuristicas
+        HeuristicaControle heuristica;
+        if (radioTempo.isSelected()) {
+            heuristica = new HeuristicaTempo();
+        } else if (radioEnergia.isSelected()) {
+            heuristica = new HeuristicaEnergia();
+        } else {
+            heuristica = new HeuristicaSemOtimizacao();
+        }
+
         // Verifica se os campos são números válidos
         try {
             Integer.parseInt(inputAndares.getText());
@@ -126,7 +145,7 @@ public class TelaInicialController {
                     int tempo = Integer.parseInt(inputTempo.getText());
 
                     simulador = new Simulador();
-                    simulador.configurar(andares, elevadores, pessoas, tempo);
+                    simulador.configurar(andares, elevadores, pessoas, tempo, heuristica);
 
                     construirPredioVisual(andares, elevadores);
                     iniciarLoopVisual();
@@ -155,6 +174,13 @@ public class TelaInicialController {
                 estadoAtual = EstadoSimulacao.RODANDO;
             }
         }
+    }
+
+    public void initialize() {
+        ToggleGroup grupo = new ToggleGroup();
+        radioEnergia.setToggleGroup(grupo);
+        radioTempo.setToggleGroup(grupo);
+        radioSem.setToggleGroup(grupo);
     }
 
     private void construirPredioVisual(int andares, int elevadores) {

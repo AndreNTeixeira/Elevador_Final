@@ -105,22 +105,39 @@ public class Elevador extends EntidadeSimulavel {
     }
 
     private void mover() {
+
+    /* ────────────────────────────────────────────────
+       1) ELEVADOR VAZIO → deve retornar ao térreo
+       ────────────────────────────────────────────────*/
         if (getQuantidadePassageiros() == 0) {
-            // Elevador vazio → desce para o térreo
+
+            // Se ainda não está no térreo, desce um andar
             if (andarAtual > 0) {
                 subindo = false;
                 andarAtual--;
             }
-            // Se já estiver no térreo, permanece parado
+
+            // Chegou vazio ao térreo: reseta direção para cima e sai
+            if (andarAtual == 0) {
+                subindo = true;
+                System.out.println("Elevador " + id +
+                        " chegou vazio ao térreo. Pronto para nova viagem.");
+                return;   // evita imprimir log “Descendo” parado no 0
+            }
+
+    /* ────────────────────────────────────────────────
+       2) ELEVADOR COM PASSAGEIROS
+       ────────────────────────────────────────────────*/
         } else {
-            // Atualiza direção antes de mover
+
+            // Inverte direção nos extremos
             if (subindo && andarAtual == andarMaximo) {
                 subindo = false;
             } else if (!subindo && andarAtual == 0) {
                 subindo = true;
             }
 
-            // Move conforme a direção
+            // Move um andar conforme a direção
             if (subindo) {
                 andarAtual++;
             } else {
@@ -128,21 +145,13 @@ public class Elevador extends EntidadeSimulavel {
             }
         }
 
+    /* ────────────────────────────────────────────────
+       Log
+       ────────────────────────────────────────────────*/
         System.out.println("Elevador " + id + " está no andar " + andarAtual +
                 " com " + getQuantidadePassageiros() + " passageiros. " +
                 (subindo ? "Subindo ↑" : "Descendo ↓"));
     }
-
-   /* @Override
-    public void atualizar(int minutoSimulado) {
-        removerPassageiros();
-        mover();
-
-        System.out.println("Elevador " + id + " está no andar " + andarAtual +
-                " com " + getQuantidadePassageiros() + " passageiros.");
-    }
-
-    */
 
     public int getAndarAtual() {
         return andarAtual;

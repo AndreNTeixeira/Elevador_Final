@@ -65,6 +65,36 @@ public class Andar implements Serializable {
         }
     }
 
+    public void embarcarPessoasPorDestino(Elevador elevador, int destino, int minutoAtual) {
+        Ponteiro atual = pessoasAguardando.getInicio();
+        Ponteiro anterior = null;
+
+        while (atual != null && elevador.getCapacidadeDisponivel() > 0) {
+            Pessoa pessoa = (Pessoa) atual.getElemento();
+            Ponteiro proximo = atual.getProximo();
+
+            if (pessoa.getAndarDestino() == destino && pessoa.getAndarOrigem() == this.numero) {
+                elevador.adicionarPassageiro(pessoa, minutoAtual);
+                if (anterior == null) {
+                    pessoasAguardando.setInicio(proximo);
+                } else {
+                    anterior.setProximo(proximo);
+                }
+                if (proximo == null) {
+                    pessoasAguardando.setFim(anterior);
+                }
+            } else {
+                anterior = atual;
+            }
+
+            atual = proximo;
+        }
+
+        if (pessoasAguardando.estaVazia()) {
+            painel.limparChamadas();
+        }
+    }
+
     public void registrarChegadaDePassageiro(Pessoa pessoa, int minutoAtual) {
         pessoa.registrarTempoChegada(minutoAtual);
         pessoasPresentes.inserirFim(pessoa);

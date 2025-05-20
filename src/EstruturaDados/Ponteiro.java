@@ -20,4 +20,8 @@ public class Ponteiro {
     public void setProximo(Ponteiro proximo) {
         this.proximo = proximo;
     }
+
+    public void setElemento(int i) {
+
+    }
 }

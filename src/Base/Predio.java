@@ -4,20 +4,19 @@ import EstruturaDados.Lista;
 import EstruturaDados.Ponteiro;
 import Simulacao.CentralDeControle;
 import Simulacao.EntidadeSimulavel;
+import controle.HeuristicaControle;
 
 public class Predio extends EntidadeSimulavel {
     private CentralDeControle central;
     private Lista andares;
     private int proximoIdPessoa = 1;
 
-    public Predio(int quantidadeAndares, int quantidadeElevadores) {
+    public Predio(int quantidadeAndares, int quantidadeElevadores, HeuristicaControle heuristica) {
         andares = new Lista();
-        central = new CentralDeControle(quantidadeElevadores, quantidadeAndares);
-
+        central = new CentralDeControle(quantidadeElevadores, quantidadeAndares, heuristica);
         for (int i = 0; i <= quantidadeAndares; i++) {
             andares.inserirFim(new Andar(i));
         }
-
         central.setAndares(andares); // conecta os andares à central
     }
 
