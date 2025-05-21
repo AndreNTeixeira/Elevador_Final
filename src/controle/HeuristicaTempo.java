@@ -3,7 +3,7 @@ package controle;
 import Base.*;
 import EstruturaDados.*;
 
-public class HeuristicaTempo implements HeuristicaControle {
+public class HeuristicaTempo extends HeuristicaControle {
     @Override
     public void decidir(Lista elevadores, Lista andares, int minutoAtual) {
         Ponteiro pAndar = andares.getInicio();

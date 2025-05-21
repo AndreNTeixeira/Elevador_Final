@@ -43,20 +43,20 @@ public class CentralDeControle extends EntidadeSimulavel {
 
             pElevador = pElevador.getProximo();
         }
-        if (minutoSimulado % 60==0){
+        if (minutoSimulado % 60 == 0) {
             exibirMetricas(minutoSimulado);
         }
     }
 
-    private void exibirMetricas(int minutoSimulado){
+    private void exibirMetricas(int minutoSimulado) {
         System.out.println("\n=== METRICAS DOS ELEVADORES (Minuto" + minutoSimulado + ") ===");
 
         Ponteiro pElevador = elevadores.getInicio();
-        while (pElevador != null){
+        while (pElevador != null) {
             Elevador elevador = (Elevador) pElevador.getElemento();
             MetricasElevador metricas = elevador.getMetricas();
 
-            System.out.println("Elevador "+ elevador.getId()+ ":");
+            System.out.println("Elevador " + elevador.getId() + ":");
             System.out.println("  - Energia total gasta: " + metricas.getEnergiaTotalGasta() + " unidades");
             System.out.println("  - Tempo em movimento: " + metricas.getTempoTotalMovimentacao() + " minutos");
             System.out.println("  - Tempo parado: " + metricas.getTempoTotalParado() + " minutos");
@@ -79,10 +79,13 @@ public class CentralDeControle extends EntidadeSimulavel {
             Ponteiro p = filaAguardando.getInicio();
             while (p != null && elevador.getCapacidadeDisponivel() > 0) {
                 Pessoa pessoa = (Pessoa) p.getElemento();
-                if (!pessoa.estaDentroDoElevador()) {
+                if (!pessoa.estaDentroDoElevador()
+                        && pessoa.getAndarOrigem() == andarAtual) {   // ← verificação adicionada
                     elevador.adicionarPassageiro(pessoa, minutoAtual);
                     filaAguardando.desenfileirar();
-                    System.out.println("Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual + " para voltar ao térreo");
+                    System.out.println("Pessoa " + pessoa.getId() +
+                            " embarcou no andar " + andarAtual +
+                            " para voltar ao térreo");
                 }
                 p = p.getProximo();
             }

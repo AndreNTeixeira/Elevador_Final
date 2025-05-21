@@ -3,6 +3,6 @@ package controle;
 import Base.Elevador;
 import EstruturaDados.Lista;
 
-public interface HeuristicaControle {
-    void decidir(Lista elevadores, Lista andares, int minutoAtual);
+public abstract class HeuristicaControle {
+    public abstract void decidir(Lista elevadores, Lista andares, int minutoAtual);
 }

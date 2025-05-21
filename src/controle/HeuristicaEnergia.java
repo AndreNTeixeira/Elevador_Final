@@ -7,7 +7,7 @@ import EstruturaDados.Fila;
 import EstruturaDados.Lista;
 import EstruturaDados.Ponteiro;
 
-public class HeuristicaEnergia implements HeuristicaControle {
+public class HeuristicaEnergia extends HeuristicaControle {
     @Override
     public void decidir(Lista elevadores, Lista andares, int minutoAtual) {
         Ponteiro pAndar = andares.getInicio();

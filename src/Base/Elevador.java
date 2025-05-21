@@ -29,20 +29,20 @@ public class Elevador extends EntidadeSimulavel {
     }
 
     @Override
-    public void atualizar(int minutoSimulado){
-        int tempoDecorrido = minutoSimulado - (int)tempoUltimaAtualizacao;
+    public void atualizar(int minutoSimulado) {
+        int tempoDecorrido = minutoSimulado - (int) tempoUltimaAtualizacao;
 
-        if(getQuantidadePassageiros() == 0 && andarAtual==0){
-            if(!estavaParado){
+        if (getQuantidadePassageiros() == 0 && andarAtual == 0) {
+            if (!estavaParado) {
                 estavaParado = true;
             }
             metricas.adicionarTempoParado(tempoDecorrido);
-        } else{
-            if(estavaParado){
+        } else {
+            if (estavaParado) {
                 estavaParado = false;
                 metricas.incrementarViagens();
             }
-            int energiaGasta= calcularEnergiaGasta(tempoDecorrido);
+            int energiaGasta = calcularEnergiaGasta(tempoDecorrido);
             metricas.adicionarEnergiaGasta(energiaGasta);
             metricas.adicionarTempoMovimentacao(tempoDecorrido);
         }
@@ -51,12 +51,12 @@ public class Elevador extends EntidadeSimulavel {
         mover();
     }
 
-    private int calcularEnergiaGasta(int tempoDecorrido){
-        int consumoBase=1;
-        int consumoPorPassageiro=1;
-        int quantidadePassageiros=getQuantidadePassageiros();
+    private int calcularEnergiaGasta(int tempoDecorrido) {
+        int consumoBase = 1;
+        int consumoPorPassageiro = 1;
+        int quantidadePassageiros = getQuantidadePassageiros();
 
-        return tempoDecorrido *(consumoBase + (consumoPorPassageiro * quantidadePassageiros));
+        return tempoDecorrido * (consumoBase + (consumoPorPassageiro * quantidadePassageiros));
     }
 
     public void adicionarPassageiro(Pessoa pessoa, int minutoAtual) {
@@ -69,6 +69,7 @@ public class Elevador extends EntidadeSimulavel {
             System.out.println("Pessoa " + pessoa.getId() + " entrou no Elevador " + id);
         }
     }
+
     public MetricasElevador getMetricas() {
         return metricas;
     }
