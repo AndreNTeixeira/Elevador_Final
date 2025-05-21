@@ -13,13 +13,16 @@ public class Elevador extends EntidadeSimulavel {
     private boolean subindo = true;
     private Lista passageiros = new Lista();
 
-    // pausa nos andares
-    private int pausaRestante = 0;          // ticks (minutos simulados) que ainda deve ficar parado
+    /* ─── Pausa de desembarque ────────────────────── */
+    private int pausaRestante = 0;                // minutos que faltam parado
     private static final int TEMPO_POR_PASSAGEIRO = 1;
-    private int passageirosParaDesembarcar = 0;   // faltam sair deste andar?
-    private boolean emDesembarque = false;        // elevador já anunciou a parada?// cada passageiro = 1 minuto (ajuste ao gosto)
+    private int passageirosParaDesembarcar = 0;
+    private boolean emDesembarque = false;
 
-    //adicionando metricas
+    /* ─── Dwell time no térreo ─────────────────────── */
+    private boolean aguardandoPartidaDoTerreo = false;
+
+    /* ─── Métricas ─────────────────────────────────── */
     private MetricasElevador metricas;
     private long tempoUltimaAtualizacao;
     private boolean estavaParado;
@@ -27,7 +30,6 @@ public class Elevador extends EntidadeSimulavel {
     public Elevador(int id, int andarMaximo) {
         this.id = id;
         this.andarMaximo = andarMaximo;
-        // adicionando metricas
         this.metricas = new MetricasElevador();
         this.tempoUltimaAtualizacao = 0;
         this.estavaParado = true;
@@ -36,48 +38,57 @@ public class Elevador extends EntidadeSimulavel {
 
     @Override
     public void atualizar(int minutoSimulado) {
-        int tempoDecorrido = minutoSimulado - (int) tempoUltimaAtualizacao;
-
-        if (getQuantidadePassageiros() == 0 && andarAtual == 0) {
-            if (!estavaParado) {
-                estavaParado = true;
-            }
-            metricas.adicionarTempoParado(tempoDecorrido);
-        } else {
-            if (estavaParado) {
-                estavaParado = false;
-                metricas.incrementarViagens();
-            }
-            int energiaGasta = calcularEnergiaGasta(tempoDecorrido);
-            metricas.adicionarEnergiaGasta(energiaGasta);
-            metricas.adicionarTempoMovimentacao(tempoDecorrido);
-        }
-// ─── 1) ainda parado? ─────────────────────────────
-        if (pausaRestante > 0) {
-            // libera UM passageiro por ciclo
-            desembarcarUmPassageiro(minutoSimulado);
-            pausaRestante--;                     // 1 min passou
+        /* ───  dwell após embarque no térreo ─────── */
+        if (aguardandoPartidaDoTerreo) {
+            System.out.printf("Elevador %d está no andar 0 com %d passageiros. Fechando portas…%n",
+                    id, getQuantidadePassageiros());
             metricas.adicionarTempoParado(1);
-            return;                              // não anda enquanto houver pausa
+            aguardandoPartidaDoTerreo = false;
+            tempoUltimaAtualizacao = minutoSimulado;
+            return;                      // não se move neste ciclo
         }
 
-// ─── 2) acabou a pausa ou não havia pausa ─────────
+        /* ───  tratamento de pausa de desembarque ─ */
+        if (pausaRestante > 0) {
+            desembarcarUmPassageiro(minutoSimulado);
+            pausaRestante--;
+            metricas.adicionarTempoParado(1);
+            return;
+        }
+
+        /* ───  verificar se há novos desembarques ─ */
         if (!emDesembarque) {
             passageirosParaDesembarcar = contarPassageirosDoAndarAtual();
             if (passageirosParaDesembarcar > 0) {
-                pausaRestante      = passageirosParaDesembarcar; // 1 min por passageiro
-                emDesembarque      = true;
+                pausaRestante = passageirosParaDesembarcar;    // 1 min por passageiro
+                emDesembarque = true;
                 System.out.printf(
                         "Elevador %d está aguardando %d passageiro(s) desembarcar(em) no andar %d%n",
                         id, passageirosParaDesembarcar, andarAtual
                 );
-                metricas.adicionarTempoParado(1); // já conta o 1º minuto
-                return;                           // anunciamos – nada mais neste ciclo
+                metricas.adicionarTempoParado(1);              // já conta o 1º minuto
+                return;
             }
         }
         emDesembarque = false;
+
+        /* ───  atualizar métricas de energia/tempo ─ */
+        int tempoDecorrido = minutoSimulado - (int) tempoUltimaAtualizacao;
+        if (getQuantidadePassageiros() == 0 && andarAtual == 0) {
+            metricas.adicionarTempoParado(tempoDecorrido);
+            estavaParado = true;
+        } else {
+            if (estavaParado) {
+                metricas.incrementarViagens();
+                estavaParado = false;
+            }
+            metricas.adicionarEnergiaGasta(calcularEnergiaGasta(tempoDecorrido));
+            metricas.adicionarTempoMovimentacao(tempoDecorrido);
+        }
+
         tempoUltimaAtualizacao = minutoSimulado;
-        removerPassageiros(minutoSimulado);
+
+        /* ───  mover elevador ────────────────────── */
         mover();
     }
 
@@ -88,13 +99,11 @@ public class Elevador extends EntidadeSimulavel {
         while (atual != null) {
             Pessoa p = (Pessoa) atual.getElemento();
             if (p.getAndarDestino() == andarAtual) {
-                // remove o PRIMEIRO que encontrar e volta
                 p.sairElevador();
                 p.registrarTempoSaidaElevador(minutoAtual);
                 System.out.printf("Pessoa %d saiu no andar %d do Elevador %d%n",
                         p.getId(), andarAtual, id);
 
-                // remoção na lista
                 if (anterior == null) {
                     passageiros.setInicio(atual.getProximo());
                 } else {
@@ -103,12 +112,13 @@ public class Elevador extends EntidadeSimulavel {
                 if (atual.getProximo() == null) {
                     passageiros.setFim(anterior);
                 }
-                return;            // só 1 passageiro por ciclo
+                return;         // só um passageiro por ciclo
             }
             anterior = atual;
             atual = atual.getProximo();
         }
     }
+
     private int contarPassageirosDoAndarAtual() {
         int n = 0;
         for (Ponteiro p = passageiros.getInicio(); p != null; p = p.getProximo()) {
@@ -117,13 +127,10 @@ public class Elevador extends EntidadeSimulavel {
         return n;
     }
 
-
     private int calcularEnergiaGasta(int tempoDecorrido) {
         int consumoBase = 1;
         int consumoPorPassageiro = 1;
-        int quantidadePassageiros = getQuantidadePassageiros();
-
-        return tempoDecorrido * (consumoBase + (consumoPorPassageiro * quantidadePassageiros));
+        return tempoDecorrido * (consumoBase + consumoPorPassageiro * getQuantidadePassageiros());
     }
 
     public void adicionarPassageiro(Pessoa pessoa, int minutoAtual) {
@@ -134,6 +141,11 @@ public class Elevador extends EntidadeSimulavel {
             passageiros.inserirFim(pessoa);
             metricas.incrementarPessoasTransportadas();
             System.out.println("Pessoa " + pessoa.getId() + " entrou no Elevador " + id);
+
+            /* ─── marca dwell se for no térreo ─────── */
+            if (andarAtual == 0) {
+                aguardandoPartidaDoTerreo = true;
+            }
         }
     }
 
@@ -141,10 +153,7 @@ public class Elevador extends EntidadeSimulavel {
         return metricas;
     }
 
-    // novo aqui
     private void removerPassageiros(int minutoAtual) {
-        int desembarques = 0;
-
         Ponteiro atual = passageiros.getInicio();
         Ponteiro anterior = null;
 
@@ -166,16 +175,12 @@ public class Elevador extends EntidadeSimulavel {
                 if (proximo == null) {
                     passageiros.setFim(anterior);
                 }
-                desembarques++;
+
             } else {
                 anterior = atual;
             }
+
             atual = proximo;
-        }
-        if (desembarques > 0) {
-            pausaRestante = desembarques * TEMPO_POR_PASSAGEIRO;
-            System.out.println("Elevador " + id + " está aguardando "
-                    + pausaRestante + " passageiro(s) " + " desembarcar(em) no andar " + andarAtual);
         }
     }
 

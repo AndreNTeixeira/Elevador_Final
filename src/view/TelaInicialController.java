@@ -18,6 +18,8 @@ import java.util.Map;
 import Base.Elevador;
 import EstruturaDados.Ponteiro;
 import Simulacao.Simulador;
+import view.DoorPane;
+import javafx.util.Duration;
 
 import controle.HeuristicaControle;
 import controle.HeuristicaSemOtimizacao;
