@@ -134,6 +134,4 @@ public class Andar implements Serializable {
             atual = proximo;
         }
     }
-
-
 }

@@ -230,17 +230,14 @@ public class TelaInicialController {
     }
 
     private StackPane criarCelulaElevador(Elevador e, int andar) {
-        Rectangle fundo = new Rectangle(40, 40);
-        fundo.setFill(Color.LIGHTGRAY);
-        fundo.setStroke(Color.DARKGRAY);
-
-        Text texto = new Text("");
-        StackPane celula = new StackPane(fundo, texto);
+        DoorPane portas = new DoorPane(40, 40);          // ← agora é DoorPane
+        Text texto      = new Text("");
+        StackPane cel   = new StackPane(portas, texto);
 
         String chave = e.hashCode() + "-" + andar;
-        elevadorViews.put(chave, celula);
+        elevadorViews.put(chave, cel);
 
-        return celula;
+        return cel;
     }
 
     private void iniciarLoopVisual() {
@@ -253,37 +250,47 @@ public class TelaInicialController {
     }
 
     private void atualizarVisual() {
-        int totalAndares = simulador.getPredio().getAndares().tamanho();
-        int minutosSimulados = simulador.getMinutoAtual();
-        int horas = minutosSimulados / 60;
-        int minutos = minutosSimulados % 60;
+        int totalAndares      = simulador.getPredio().getAndares().tamanho();
+        int minutosSimulados  = simulador.getMinutoAtual();
+        int horas    = minutosSimulados / 60;
+        int minutos  = minutosSimulados % 60;
 
+        Ponteiro p = simulador.getPredio()
+                .getCentral()
+                .getElevadores()
+                .getInicio();
 
-        Ponteiro p = simulador.getPredio().getCentral().getElevadores().getInicio();
         while (p != null) {
             Elevador elevador = (Elevador) p.getElemento();
-            int andarAtual = elevador.getAndarAtual();
-            int capacidade = elevador.getQuantidadePassageiros();
-            boolean subindo = elevador.isSubindo();
+            int andarAtual    = elevador.getAndarAtual();
+            int capacidade    = elevador.getQuantidadePassageiros();
+            boolean subindo   = elevador.isSubindo();
+            boolean abrindo   = elevador.getPausaRestante() > 0;   // ← portas abertas?
 
             for (int andar = 0; andar < totalAndares; andar++) {
-                String chave = elevador.hashCode() + "-" + andar;
-                StackPane celula = elevadorViews.get(chave);
+                String chave      = elevador.hashCode() + "-" + andar;
+                StackPane celula  = elevadorViews.get(chave);
                 if (celula == null) continue;
 
-                Rectangle fundo = (Rectangle) celula.getChildren().get(0);
-                Text texto = (Text) celula.getChildren().get(1);
+                DoorPane portas = (DoorPane) celula.getChildren().get(0); // índice 0
+                Text texto      = (Text)      celula.getChildren().get(1); // índice 1
 
-                if (andar == andarAtual) {
-                    fundo.setFill(Color.GOLD);
+                if (andar == andarAtual) {                 // cabine aqui
+                    if (abrindo) portas.open();            // desembarcando
+                    else          portas.close();
+
+                    portas.setOpacity(1);                  // destaque (GOLD)
+                    portas.setStyle("-fx-fill: gold;");    // cor base (via CSS)
+
                     String dir = subindo ? "↑" : "↓";
                     texto.setText("P: " + capacidade + " " + dir);
-                } else {
-                    fundo.setFill(Color.LIGHTGRAY);
+                } else {                                   // andares vazios
+                    portas.close();
+                    portas.setOpacity(0.6);                // tom mais claro
+                    portas.setStyle("-fx-fill: lightgray;");
                     texto.setText("");
                 }
             }
-
             p = p.getProximo();
         }
         labelTempo.setText(String.format("%02d:%02d:%02d", horas, minutos, 0));

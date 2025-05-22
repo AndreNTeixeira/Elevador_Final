@@ -274,4 +274,8 @@ public class Elevador extends EntidadeSimulavel {
     public Lista getPassageiros() {
         return passageiros;
     }
+
+    public int getPausaRestante() {
+        return pausaRestante;
+    }
 }
