@@ -67,10 +67,29 @@ public class Simulador implements Serializable {
 
         // Relatório final
         System.out.println("\n========= RELATÓRIO FINAL =========");
+
+        //variaveis de soma
+        int somaTempoTotal = 0;
+        int somaEnergiaTotal = 0;
+        int somaViagensTotal = 0;
+
         Ponteiro pElev = predio.getCentral().getElevadores().getInicio();
         while (pElev != null) {
             Base.Elevador e = (Base.Elevador) pElev.getElemento();
             Metricas.MetricasElevador m = e.getMetricas();
+
+            int tempoMov = m.getTempoTotalMovimentacao();
+            int tempoParado = m.getTempoTotalParado();
+            int tempoTotal = tempoMov + tempoParado;
+            int energia = m.getEnergiaTotalGasta();
+            int viagens = m.getNumeroViagens();
+
+            somaTempoTotal += tempoTotal;
+            somaEnergiaTotal += energia;
+            somaViagensTotal += viagens;
+
+
+
             System.out.printf(
                     "Elevador %d | Viagens: %d | Pessoas: %d | Energia: %d | " +
                             "Movimentação: %d min | Parado: %d min%n",
@@ -83,6 +102,11 @@ public class Simulador implements Serializable {
             );
             pElev = pElev.getProximo();
         }
+        System.out.println("===================================\n");
+        System.out.println("===================================");
+        System.out.printf("Tempo total (todos os elevadores): %d min%n", somaTempoTotal);
+        System.out.printf("Energia total (todos os elevadores): %d%n", somaEnergiaTotal);
+        System.out.printf("Total de viagens (todos os elevadores): %d%n", somaViagensTotal);
         System.out.println("===================================\n");
     }
 
