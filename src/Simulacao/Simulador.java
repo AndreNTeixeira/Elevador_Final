@@ -18,14 +18,18 @@ public class Simulador implements Serializable {
     private boolean emExecucao;
     private Predio predio;
     private int totalPessoas;
+    private int pessoasRestantes;
+    private int tempoTotalSimulacao =1440;
+    private int idPessoaAtual=1;
+    private double acumuladorPessoa = 0;
 
 
     public void configurar(int andares, int elevadores, int pessoas, int velocidadeEmMs, HeuristicaControle heuristica) {
         this.velocidadeEmMs = velocidadeEmMs;
         this.totalPessoas = pessoas;
+        this.pessoasRestantes = pessoas;
         this.predio = new Predio(andares, elevadores, heuristica);
         System.out.println("Heurística selecionada: " + heuristica.getClass().getSimpleName());
-        gerarPessoasIniciais(minutoSimulado);
     }
 
     public void iniciarSimulacao() {
@@ -39,7 +43,13 @@ public class Simulador implements Serializable {
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                predio.atualizar(minutoSimulado++);
+                if (minutoSimulado>= tempoTotalSimulacao) {
+                    encerrar();
+                    return;
+                }
+                predio.atualizar(minutoSimulado);
+                gerarPessoas(minutoSimulado);
+                minutoSimulado++;
             }
         }, 0, velocidadeEmMs);
     }
@@ -110,7 +120,40 @@ public class Simulador implements Serializable {
         System.out.println("===================================\n");
     }
 
-    private void gerarPessoasIniciais(int minutoAtual) {
+    private void gerarPessoas(int minutoAtual) {
+
+        if (pessoasRestantes <= 0) return;
+
+        // Estratégia: distribui pessoas ao longo do dia uniformemente
+        double taxaBase =(double)  totalPessoas / tempoTotalSimulacao;
+
+        // simular horários de pico
+        double taxa = taxaBase;
+        if (minutoAtual >= 420 && minutoAtual <= 540) taxa *= 1.6; // pico manhã (7h–9h)
+        if (minutoAtual >= 1020 && minutoAtual <= 1140) taxa += 1.5; // pico tarde (17h–19h)
+
+        acumuladorPessoa += taxa;
+
+        int pessoasAGerar = (int) acumuladorPessoa;
+        acumuladorPessoa -= pessoasAGerar;
+
+        Random random = new Random();
+        int quantidadeAndares = getQuantidadeAndares();
+
+        for (int i = 0; i < pessoasAGerar && pessoasRestantes > 0; i++) {
+            int destino = random.nextInt(quantidadeAndares - 1) + 1; // 1 até N-1
+            boolean idoso = random.nextInt(100) < 15;
+            boolean cadeirante = !idoso && random.nextInt(100) < 3;
+            Pessoa p = new Pessoa(idPessoaAtual++, 0, destino, idoso, cadeirante);
+            getAndar(0).adicionarPessoa(p, minutoAtual);
+            pessoasRestantes--;
+
+            System.out.println("Pessoa " + p.getId() + " gerada para o andar " + destino + " no minuto " + minutoAtual);
+
+        }
+    }
+
+    /*private void gerarPessoasIniciais(int minutoAtual) {
         Andar terreo = getAndar(0);
         Random random = new Random();
         int quantidadeAndares = getQuantidadeAndares();
@@ -122,7 +165,7 @@ public class Simulador implements Serializable {
             Pessoa p = new Pessoa(i + 1, 0, destino, idoso, cadeirante);
             terreo.adicionarPessoa(p, minutoAtual);
         }
-    }
+    }*/
 
     private Andar getAndar(int numero) {
         Ponteiro p = predio.getAndares().getInicio();
