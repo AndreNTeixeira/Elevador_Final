@@ -11,50 +11,48 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Simulador implements Serializable {
-    private int minutoSimulado;
-    private int velocidadeEmMs;
-    private transient Timer timer;
-    private boolean emExecucao;
-    private Predio predio;
-    private int totalPessoas;
-    private int pessoasRestantes;
-    private int tempoTotalSimulacao =1440;
-    private int idPessoaAtual=1;
-    private double acumuladorPessoa = 0;
-
+public class Simulador implements Serializable { // Classe principal da simulação, permite serialização do estado
+    private int minutoSimulado; // Contador de tempo simulado em minutos
+    private int velocidadeEmMs; // Velocidade da simulação (1 minuto simulado a cada X ms reais)
+    private transient Timer timer; // Timer de execução (não serializável)
+    private boolean emExecucao; // Status da simulação
+    private Predio predio; // Instância do prédio com andares e elevadores
+    private int totalPessoas; // Número total de pessoas que devem ser geradas
+    private int pessoasRestantes; // Quantidade restante de pessoas para gerar
+    private int tempoTotalSimulacao = 1440; // Duração total da simulação (1440 min = 24h)
+    private int idPessoaAtual = 1; // ID incremental para novas pessoas
+    private double acumuladorPessoa = 0; // Acumula frações para geração contínua de pessoas
 
     public void configurar(int andares, int elevadores, int pessoas, int velocidadeEmMs, HeuristicaControle heuristica) {
-        this.velocidadeEmMs = velocidadeEmMs;
-        this.totalPessoas = pessoas;
-        this.pessoasRestantes = pessoas;
-        this.predio = new Predio(andares, elevadores, heuristica);
+        this.velocidadeEmMs = velocidadeEmMs; // Define a velocidade da simulação
+        this.totalPessoas = pessoas; // Define o total de pessoas a gerar
+        this.pessoasRestantes = pessoas; // Inicializa a contagem de pessoas restantes
+        this.predio = new Predio(andares, elevadores, heuristica); // Cria o prédio com a heurística
         System.out.println("Heurística selecionada: " + heuristica.getClass().getSimpleName());
     }
 
-    public void iniciarSimulacao() {
+    public void iniciarSimulacao() { // Inicia a simulação
         this.minutoSimulado = 0;
         this.emExecucao = true;
-        iniciarTimer();
+        iniciarTimer(); // Inicia o timer que atualiza a simulação a cada intervalo
     }
-
 
     private void iniciarTimer() {
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                if (minutoSimulado>= tempoTotalSimulacao) {
-                    encerrar();
+                if (minutoSimulado >= tempoTotalSimulacao) {
+                    encerrar(); // Encerra se chegou ao tempo limite
                     return;
                 }
-                predio.atualizar(minutoSimulado);
-                gerarPessoas(minutoSimulado);
-                minutoSimulado++;
+                predio.atualizar(minutoSimulado); // Atualiza estado do prédio
+                gerarPessoas(minutoSimulado); // Gera novas pessoas
+                minutoSimulado++; // Avança o tempo
             }
-        }, 0, velocidadeEmMs);
+        }, 0, velocidadeEmMs); // Executa a cada intervalo definido
     }
 
-    public void pausar() {
+    public void pausar() { // Pausa a simulação
         if (timer != null) {
             timer.cancel();
             emExecucao = false;
@@ -62,7 +60,7 @@ public class Simulador implements Serializable {
         }
     }
 
-    public void continuar() {
+    public void continuar() { // Continua a simulação se estiver pausada
         if (!emExecucao) {
             iniciarTimer();
             emExecucao = true;
@@ -70,20 +68,18 @@ public class Simulador implements Serializable {
         }
     }
 
-    public void encerrar() {
+    public void encerrar() { // Encerra a simulação e imprime relatório final
         if (timer != null) timer.cancel();
         emExecucao = false;
         System.out.println("Simulação encerrada.");
 
-        // Relatório final
         System.out.println("\n========= RELATÓRIO FINAL =========");
 
-        //variaveis de soma
         int somaTempoTotal = 0;
         int somaEnergiaTotal = 0;
         int somaViagensTotal = 0;
 
-        Ponteiro pElev = predio.getCentral().getElevadores().getInicio();
+        Ponteiro pElev = predio.getCentral().getElevadores().getInicio(); // Itera por todos os elevadores
         while (pElev != null) {
             Base.Elevador e = (Base.Elevador) pElev.getElemento();
             Metricas.MetricasElevador m = e.getMetricas();
@@ -98,8 +94,6 @@ public class Simulador implements Serializable {
             somaEnergiaTotal += energia;
             somaViagensTotal += viagens;
 
-
-
             System.out.printf(
                     "Elevador %d | Viagens: %d | Pessoas: %d | Energia: %d | " +
                             "Movimentação: %d min | Parado: %d min%n",
@@ -110,8 +104,9 @@ public class Simulador implements Serializable {
                     m.getTempoTotalMovimentacao(),
                     m.getTempoTotalParado()
             );
-            pElev = pElev.getProximo();
+            pElev = pElev.getProximo(); // Próximo elevador
         }
+
         System.out.println("===================================\n");
         System.out.println("===================================");
         System.out.printf("Tempo total (todos os elevadores): %d min%n", somaTempoTotal);
@@ -120,19 +115,18 @@ public class Simulador implements Serializable {
         System.out.println("===================================\n");
     }
 
-    private void gerarPessoas(int minutoAtual) {
+    private void gerarPessoas(int minutoAtual) { // Geração dinâmica de pessoas
 
-        if (pessoasRestantes <= 0) return;
+        if (pessoasRestantes <= 0) return; // Não gera mais se acabou
 
-        // Estratégia: distribui pessoas ao longo do dia uniformemente
-        double taxaBase =(double)  totalPessoas / tempoTotalSimulacao;
-
-        // simular horários de pico
+        double taxaBase = (double) totalPessoas / tempoTotalSimulacao; // Distribuição uniforme
         double taxa = taxaBase;
+
+        // Aumenta a taxa em horários de pico
         if (minutoAtual >= 420 && minutoAtual <= 540) taxa *= 1.6; // pico manhã (7h–9h)
         if (minutoAtual >= 1020 && minutoAtual <= 1140) taxa += 1.5; // pico tarde (17h–19h)
 
-        acumuladorPessoa += taxa;
+        acumuladorPessoa += taxa; // Acumula frações para gerar pessoa inteira
 
         int pessoasAGerar = (int) acumuladorPessoa;
         acumuladorPessoa -= pessoasAGerar;
@@ -141,32 +135,18 @@ public class Simulador implements Serializable {
         int quantidadeAndares = getQuantidadeAndares();
 
         for (int i = 0; i < pessoasAGerar && pessoasRestantes > 0; i++) {
-            int destino = random.nextInt(quantidadeAndares - 1) + 1; // 1 até N-1
-            boolean idoso = random.nextInt(100) < 15;
-            boolean cadeirante = !idoso && random.nextInt(100) < 3;
-            Pessoa p = new Pessoa(idPessoaAtual++, 0, destino, idoso, cadeirante);
-            getAndar(0).adicionarPessoa(p, minutoAtual);
+            int destino = random.nextInt(quantidadeAndares - 1) + 1; // Gera destino entre 1 e N-1
+            boolean idoso = random.nextInt(100) < 15; // 15% chance de ser idoso
+            boolean cadeirante = !idoso && random.nextInt(100) < 3; // 3% cadeirante se não for idoso
+            Pessoa p = new Pessoa(idPessoaAtual++, 0, destino, idoso, cadeirante); // Cria pessoa
+            getAndar(0).adicionarPessoa(p, minutoAtual); // Adiciona no térreo
             pessoasRestantes--;
 
             System.out.println("Pessoa " + p.getId() + " gerada para o andar " + destino + " no minuto " + minutoAtual);
-
         }
     }
 
-    /*private void gerarPessoasIniciais(int minutoAtual) {
-        Andar terreo = getAndar(0);
-        Random random = new Random();
-        int quantidadeAndares = getQuantidadeAndares();
-
-        for (int i = 0; i < totalPessoas; i++) {
-            int destino = random.nextInt(quantidadeAndares - 1) + 1; // de 1 até N-1
-            boolean idoso      = random.nextInt(100) < 15;  // 15 % idoso
-            boolean cadeirante = !idoso && random.nextInt(100) < 3; // 3 % cadeirante
-            Pessoa p = new Pessoa(i + 1, 0, destino, idoso, cadeirante);
-            terreo.adicionarPessoa(p, minutoAtual);
-        }
-    }*/
-
+    // Método auxiliar para acessar um andar específico
     private Andar getAndar(int numero) {
         Ponteiro p = predio.getAndares().getInicio();
         while (p != null) {
@@ -177,6 +157,7 @@ public class Simulador implements Serializable {
         return null;
     }
 
+    // Conta quantos andares o prédio tem
     private int getQuantidadeAndares() {
         int count = 0;
         Ponteiro p = predio.getAndares().getInicio();
@@ -187,6 +168,7 @@ public class Simulador implements Serializable {
         return count;
     }
 
+    // Salva o estado atual da simulação em arquivo
     public void gravar(String nomeArquivo) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(nomeArquivo))) {
             out.writeObject(this);
@@ -196,10 +178,11 @@ public class Simulador implements Serializable {
         }
     }
 
+    // Carrega uma simulação salva anteriormente
     public static Simulador carregar(String nomeArquivo) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(nomeArquivo))) {
             Simulador sim = (Simulador) in.readObject();
-            sim.continuar();
+            sim.continuar(); // Retoma a simulação após carregar
             return sim;
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -207,12 +190,13 @@ public class Simulador implements Serializable {
         }
     }
 
+    // Getter para o prédio
     public Predio getPredio() {
         return predio;
     }
 
+    // Getter para o tempo atual da simulação
     public int getMinutoAtual() {
         return minutoSimulado;
     }
-
 }
