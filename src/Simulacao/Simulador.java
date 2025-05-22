@@ -18,6 +18,9 @@ public class Simulador implements Serializable {
     private boolean emExecucao;
     private Predio predio;
     private int totalPessoas;
+    private int somaTempoTotal;
+    private int somaEnergiaTotal;
+    private int somaViagensTotal;
 
 
     public void configurar(int andares, int elevadores, int pessoas, int velocidadeEmMs, HeuristicaControle heuristica) {
@@ -69,9 +72,9 @@ public class Simulador implements Serializable {
         System.out.println("\n========= RELATÓRIO FINAL =========");
 
         //variaveis de soma
-        int somaTempoTotal = 0;
-        int somaEnergiaTotal = 0;
-        int somaViagensTotal = 0;
+        somaTempoTotal   = 0;
+        somaEnergiaTotal = 0;
+        somaViagensTotal = 0;
 
         Ponteiro pElev = predio.getCentral().getElevadores().getInicio();
         while (pElev != null) {
@@ -171,5 +174,8 @@ public class Simulador implements Serializable {
     public int getMinutoAtual() {
         return minutoSimulado;
     }
+    public int getSomaTempoTotal()   { return somaTempoTotal;   }
+    public int getSomaEnergiaTotal() { return somaEnergiaTotal; }
+    public int getSomaViagensTotal() { return somaViagensTotal; }
 
 }

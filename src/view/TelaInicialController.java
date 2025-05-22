@@ -2,6 +2,11 @@ package view;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -29,24 +34,42 @@ import controle.HeuristicaEnergia;
 
 public class TelaInicialController {
 
-    @FXML private javafx.scene.control.Label labelTempo;
-    @FXML private RadioButton radioEnergia;
-    @FXML private RadioButton radioTempo;
-    @FXML private RadioButton radioSem;
-    @FXML private TextField inputAndares;
-    @FXML private TextField inputElevadores;
-    @FXML private TextField inputPessoas;
-    @FXML private TextField inputTempo;
-    @FXML private Button botaoIniciar;
-    @FXML private GridPane gradePredio;
-    @FXML private Button botaoPausar;
-    @FXML private Button botaoRetomar;
-    @FXML private Button botaoCancelar;
-
+    @FXML
+    private javafx.scene.control.Label labelTempo;
+    @FXML
+    private RadioButton radioEnergia;
+    @FXML
+    private RadioButton radioTempo;
+    @FXML
+    private RadioButton radioSem;
+    @FXML
+    private TextField inputAndares;
+    @FXML
+    private TextField inputElevadores;
+    @FXML
+    private TextField inputPessoas;
+    @FXML
+    private TextField inputTempo;
+    @FXML
+    private Button botaoIniciar;
+    @FXML
+    private GridPane gradePredio;
+    @FXML
+    private Button botaoPausar;
+    @FXML
+    private Button botaoRetomar;
+    @FXML
+    private Button botaoCancelar;
+    @FXML
+    private StackPane paneGrafico;
+    // ← injeta o contêiner
+    private BarChart<String, Number> grafico;
 
     private Simulador simulador;
     private final Map<String, StackPane> elevadorViews = new HashMap<>();
-    private enum EstadoSimulacao { NAO_INICIADA, RODANDO, PAUSADA }
+
+    private enum EstadoSimulacao {NAO_INICIADA, RODANDO, PAUSADA}
+
     private EstadoSimulacao estadoAtual = EstadoSimulacao.NAO_INICIADA;
 
     @FXML
@@ -67,7 +90,9 @@ public class TelaInicialController {
     public void aoCancelar() {
         if (simulador != null) {
             simulador.encerrar();
+            mostrarGrafico();
         }
+
         gradePredio.getChildren().clear();
         elevadorViews.clear();
         estadoAtual = EstadoSimulacao.NAO_INICIADA;
@@ -88,6 +113,105 @@ public class TelaInicialController {
         inputTempo.setDisable(false);
 
     }
+
+    // GRAFICO DO RESUMO DA SIMULAÇAO
+    private void mostrarGrafico() {
+
+        /* ───── eixos ───────────────────────────── */
+        CategoryAxis eixoX = new CategoryAxis();
+        eixoX.setLabel("Métrica");
+
+        NumberAxis eixoY = new NumberAxis();
+        eixoY.setLabel("Valor");
+
+        grafico = new BarChart<>(eixoX, eixoY);
+        grafico.setTitle("Resumo da Simulação");
+
+        /* ───── cores que vamos usar ────────────── */
+        String corTempo = "#2E8B57";   // verde
+        String corEnergia = "#FF7F50";   // coral
+        String corViagens = "#1E90FF";   // azul
+
+        /* ─── Tempo ─────────────────────────────── */
+        int tempo = simulador.getSomaTempoTotal();
+        XYChart.Series<String, Number> sTempo = novaSerie(
+                "Tempo (" + tempo + " min)", "Tempo (min)", tempo, corTempo);
+
+        /* ─── Energia ───────────────────────────── */
+        int energia = simulador.getSomaEnergiaTotal();
+        XYChart.Series<String, Number> sEnergia = novaSerie(
+                "Energia (" + energia + ")", "Energia", energia, corEnergia);
+
+        /* ─── Viagens ───────────────────────────── */
+        int viagens = simulador.getSomaViagensTotal();
+        XYChart.Series<String, Number> sViagens = novaSerie(
+                "Viagens (" + viagens + ")", "Viagens", viagens, corViagens);
+
+        grafico.getData().addAll(sTempo, sEnergia, sViagens);
+
+        /* coloca o gráfico no painel de destino */
+        paneGrafico.getChildren().setAll(grafico);
+
+        /* rótulos no topo da barra (depois que o CSS aplicar) */
+        Platform.runLater(() -> addValueLabels(sTempo));
+        Platform.runLater(() -> addValueLabels(sEnergia));
+        Platform.runLater(() -> addValueLabels(sViagens));
+
+        Platform.runLater(() -> {
+            colorirLegenda("Tempo",   corTempo);
+            colorirLegenda("Energia", corEnergia);
+            colorirLegenda("Viagens", corViagens);
+        });
+    }
+
+    /**
+     * Cria uma série unitária (uma única barra colorida)
+     */
+    private XYChart.Series<String, Number> novaSerie(
+            String nomeSerie, String categoriaX, int valorY, String corHex) {
+
+        XYChart.Series<String, Number> s = new XYChart.Series<>();
+        s.setName(nomeSerie);
+
+        XYChart.Data<String, Number> d = new XYChart.Data<>(categoriaX, valorY);
+        s.getData().add(d);
+
+        // quando o nó da barra nascer, aplica cor
+        d.nodeProperty().addListener((obs, oldNode, newNode) -> {
+            if (newNode != null) newNode.setStyle("-fx-bar-fill: " + corHex + ";");
+        });
+        return s;
+    }
+
+    private void addValueLabels(XYChart.Series<String, Number> serie) {
+        for (XYChart.Data<String, Number> d : serie.getData()) {
+            Text label = new Text(d.getYValue().toString());
+            label.setStyle("-fx-font-size: 11; -fx-font-weight: bold;");
+
+            StackPane bar = (StackPane) d.getNode();
+            bar.getChildren().add(label);             // coloca texto dentro da barra
+
+            /* reposiciona texto acima do topo da barra */
+            bar.heightProperty().addListener((o, oldH, newH) ->
+                    label.setTranslateY(-newH.doubleValue() - 2));
+        }
+    }
+
+    private void colorirLegenda(String prefixoTexto, String corHex) {
+        for (Node n : grafico.lookupAll(".chart-legend-item")) {
+            if (n instanceof Label lbl               // item da legenda é Label
+                    && lbl.getText().startsWith(prefixoTexto)) {
+
+                Node simbolo = lbl.getGraphic();     // quadradinho colorido
+                if (simbolo != null) {
+                    ((javafx.scene.Node) simbolo).setStyle("-fx-background-color: " + corHex + ";");
+                }
+            }
+        }
+    }
+
+
+    //FINAL GRAFICO
 
 
     @FXML
@@ -231,8 +355,8 @@ public class TelaInicialController {
 
     private StackPane criarCelulaElevador(Elevador e, int andar) {
         DoorPane portas = new DoorPane(40, 40);          // ← agora é DoorPane
-        Text texto      = new Text("");
-        StackPane cel   = new StackPane(portas, texto);
+        Text texto = new Text("");
+        StackPane cel = new StackPane(portas, texto);
 
         String chave = e.hashCode() + "-" + andar;
         elevadorViews.put(chave, cel);
@@ -244,16 +368,19 @@ public class TelaInicialController {
         new Thread(() -> {
             while (true) {
                 Platform.runLater(this::atualizarVisual);
-                try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ignored) {
+                }
             }
         }).start();
     }
 
     private void atualizarVisual() {
-        int totalAndares      = simulador.getPredio().getAndares().tamanho();
-        int minutosSimulados  = simulador.getMinutoAtual();
-        int horas    = minutosSimulados / 60;
-        int minutos  = minutosSimulados % 60;
+        int totalAndares = simulador.getPredio().getAndares().tamanho();
+        int minutosSimulados = simulador.getMinutoAtual();
+        int horas = minutosSimulados / 60;
+        int minutos = minutosSimulados % 60;
 
         Ponteiro p = simulador.getPredio()
                 .getCentral()
@@ -262,22 +389,22 @@ public class TelaInicialController {
 
         while (p != null) {
             Elevador elevador = (Elevador) p.getElemento();
-            int andarAtual    = elevador.getAndarAtual();
-            int capacidade    = elevador.getQuantidadePassageiros();
-            boolean subindo   = elevador.isSubindo();
-            boolean abrindo   = elevador.getPausaRestante() > 0;   // ← portas abertas?
+            int andarAtual = elevador.getAndarAtual();
+            int capacidade = elevador.getQuantidadePassageiros();
+            boolean subindo = elevador.isSubindo();
+            boolean abrindo = elevador.getPausaRestante() > 0;   // ← portas abertas?
 
             for (int andar = 0; andar < totalAndares; andar++) {
-                String chave      = elevador.hashCode() + "-" + andar;
-                StackPane celula  = elevadorViews.get(chave);
+                String chave = elevador.hashCode() + "-" + andar;
+                StackPane celula = elevadorViews.get(chave);
                 if (celula == null) continue;
 
                 DoorPane portas = (DoorPane) celula.getChildren().get(0); // índice 0
-                Text texto      = (Text)      celula.getChildren().get(1); // índice 1
+                Text texto = (Text) celula.getChildren().get(1); // índice 1
 
                 if (andar == andarAtual) {                 // cabine aqui
                     if (abrindo) portas.open();            // desembarcando
-                    else          portas.close();
+                    else portas.close();
 
                     portas.setOpacity(1);                  // destaque (GOLD)
                     portas.setStyle("-fx-fill: gold;");    // cor base (via CSS)

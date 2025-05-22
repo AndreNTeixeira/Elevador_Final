@@ -75,5 +75,9 @@
             </GridPane>
          </children>
       </StackPane>
+      <StackPane fx:id="paneGrafico"
+                 prefWidth="420" prefHeight="600"
+                 AnchorPane.leftAnchor="820" AnchorPane.topAnchor="40">
+      </StackPane>
    </children>
 </AnchorPane>
