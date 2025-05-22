@@ -26,6 +26,7 @@ public class Elevador extends EntidadeSimulavel {
     private MetricasElevador metricas;
     private long tempoUltimaAtualizacao;
     private boolean estavaParado;
+    private boolean emViagem;
 
     public Elevador(int id, int andarMaximo) {
         this.id = id;
@@ -209,6 +210,13 @@ public class Elevador extends EntidadeSimulavel {
        2) ELEVADOR COM PASSAGEIROS
        ────────────────────────────────────────────────*/
         } else {
+
+            //detector do numero de viagens
+            if (!emViagem && andarAtual ==0){
+               emViagem = true;
+               metricas.incrementarViagens(); // contagem das viagens
+            }
+
 
             // Inverte direção nos extremos
             if (subindo && andarAtual == andarMaximo) {
