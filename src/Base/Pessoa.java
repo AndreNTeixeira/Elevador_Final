@@ -13,33 +13,54 @@ public class Pessoa implements Serializable {
     private int tempoSaidaFila;
     private int tempoEntradaElevador;
     private int tempoSaidaElevador;
+    private boolean idoso;
+    private boolean cadeirante;
 
 
-    public Pessoa(int id, int origem, int destino) {
+    public Pessoa(int id, int origem, int destino, boolean idoso, boolean cadeirante) {
         this.id = id;
         this.andarOrigem = origem;
         this.andarDestino = destino;
+        this.idoso = idoso;
+        this.cadeirante = cadeirante;
         this.dentroElevador = false;
     }
-    public void registrarTempoEntradaFila(int minutoAtual){
+
+    public void registrarTempoEntradaFila(int minutoAtual) {
         this.tempoEntradaFila = minutoAtual;
     }
-    public void registrarTempoSaidaFila(int minutoAtual){
+
+    public void registrarTempoSaidaFila(int minutoAtual) {
         this.tempoSaidaFila = minutoAtual;
     }
-    public void registrarTempoEntradaElevador(int minutoAtual){
+
+    public void registrarTempoEntradaElevador(int minutoAtual) {
         this.tempoEntradaElevador = minutoAtual;
     }
-    public void registrarTempoSaidaElevador(int minutoAtual){
+
+    public void registrarTempoSaidaElevador(int minutoAtual) {
         this.tempoSaidaElevador = minutoAtual;
     }
+
+    public boolean isIdoso() {
+        return idoso;
+    }
+
+    public boolean isCadeirante() {
+        return cadeirante;
+    }
+
+    public boolean isPrioritaria() { return idoso || cadeirante; }
+
     public int getTempoEntradaFila() {
         return tempoSaidaFila - tempoEntradaFila;
     }
-    public int getTempoNoElevador(){
+
+    public int getTempoNoElevador() {
         return tempoSaidaElevador - tempoEntradaElevador;
     }
-    public int getTempoTotalSistema(){
+
+    public int getTempoTotalSistema() {
         return tempoSaidaElevador - tempoEntradaFila;
     }
 
@@ -78,7 +99,7 @@ public class Pessoa implements Serializable {
     public int getAndarOrigem() {
         return andarOrigem;
     }
-    
+
     public void setAndarOrigem(int andarOrigem) {
         this.andarOrigem = andarOrigem;
     }

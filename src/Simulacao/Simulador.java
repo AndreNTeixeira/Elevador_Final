@@ -117,7 +117,9 @@ public class Simulador implements Serializable {
 
         for (int i = 0; i < totalPessoas; i++) {
             int destino = random.nextInt(quantidadeAndares - 1) + 1; // de 1 até N-1
-            Pessoa p = new Pessoa(i + 1, 0, destino);
+            boolean idoso      = random.nextInt(100) < 15;  // 15 % idoso
+            boolean cadeirante = !idoso && random.nextInt(100) < 3; // 3 % cadeirante
+            Pessoa p = new Pessoa(i + 1, 0, destino, idoso, cadeirante);
             terreo.adicionarPessoa(p, minutoAtual);
         }
     }

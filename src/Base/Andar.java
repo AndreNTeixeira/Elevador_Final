@@ -37,10 +37,16 @@ public class Andar implements Serializable {
     }
 
     public void adicionarPessoa(Pessoa pessoa, int minutoAtual) {
-        pessoasAguardando.enfileirar(pessoa);
-        pessoa.registrarTempoEntradaFila(minutoAtual);
-        painel.registrarChamada(pessoa.getAndarDestino()); // Ex: registra destino no painel
-        System.out.println("Pessoa " + pessoa.getId() + " adicionada no andar " + numero + " com destino ao " + pessoa.getAndarDestino());
+        if (pessoa.isPrioritaria()) {
+            pessoasAguardando.enfileirarPrioritario(pessoa);
+        } else {
+            pessoasAguardando.enfileirar(pessoa);
+        }
+        painel.registrarChamada(pessoa.getAndarDestino());
+        System.out.println("Pessoa " + pessoa.getId() +
+                (pessoa.isPrioritaria() ? " (PRIORIDADE)" : "") +
+                " adicionada no andar " + numero + " com destino ao " +
+                pessoa.getAndarDestino());
     }
 
     public void embarcarPessoas(Elevador elevador, int minutoAtual) {

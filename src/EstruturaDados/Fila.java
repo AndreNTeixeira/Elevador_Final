@@ -19,6 +19,16 @@ public class Fila {
         fim = novo;
     }
 
+    public void enfileirarPrioritario(Object elemento) {
+        Ponteiro novo = new Ponteiro(elemento);
+        if (inicio == null) {             // fila vazia
+            inicio = fim = novo;
+        } else {                          // insere na frente
+            novo.setProximo(inicio);
+            inicio = novo;
+        }
+    }
+
     public void desenfileirar() {
         if (inicio == null) {
             return; // fila já vazia
