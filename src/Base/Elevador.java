@@ -5,33 +5,33 @@ import EstruturaDados.Ponteiro;
 import Metricas.MetricasElevador;
 import Simulacao.EntidadeSimulavel;
 
-public class Elevador extends EntidadeSimulavel {
-    private int id;
-    private int andarAtual = 0;
-    private int capacidadeMaxima = 8;
-    private int andarMaximo;
-    private boolean subindo = true;
-    private Lista passageiros = new Lista();
+public class Elevador extends EntidadeSimulavel {                                   // Representa um elevador dentro da simulação
+    private int id;                                                                 // Identificador do elevador
+    private int andarAtual = 0;                                                     // Andar atual do elevador (começa no térreo)
+    private int capacidadeMaxima = 8;                                               // Capacidade máxima de passageiros
+    private int andarMaximo;                                                        // Andar mais alto que o elevador pode alcançar
+    private boolean subindo = true;                                                 // Direção atual do elevador
+    private Lista passageiros = new Lista();                                        // Lista de passageiros dentro do elevador
 
     /* ─── Pausa de desembarque ────────────────────── */
-    private int pausaRestante = 0;                // minutos que faltam parado
-    private static final int TEMPO_POR_PASSAGEIRO = 1;
-    private int passageirosParaDesembarcar = 0;
-    private boolean emDesembarque = false;
+    private int pausaRestante = 0;                                                  // Tempo restante de pausa para desembarque
+    private static final int TEMPO_POR_PASSAGEIRO = 1;                              // Tempo de desembarque por passageiro
+    private int passageirosParaDesembarcar = 0;                                     // Quantidade de passageiros para desembarcar
+    private boolean emDesembarque = false;                                          // Se está atualmente desembarcando passageiros
 
     /* ─── Dwell time no térreo ─────────────────────── */
-    private boolean aguardandoPartidaDoTerreo = false;
+    private boolean aguardandoPartidaDoTerreo = false;                              // Tempo de espera antes de sair do térreo
 
     /* ─── Métricas ─────────────────────────────────── */
-    private MetricasElevador metricas;
-    private long tempoUltimaAtualizacao;
-    private boolean estavaParado;
-    private boolean emViagem;
+    private MetricasElevador metricas;                                              // Objeto de métricas do elevador
+    private long tempoUltimaAtualizacao;                                            // Último tempo registrado de atualização
+    private boolean estavaParado;                                                   // Flag para saber se o elevador estava parado
+    private boolean emViagem;                                                       // Flag que indica se está em uma nova viagem
 
     public Elevador(int id, int andarMaximo) {
         this.id = id;
         this.andarMaximo = andarMaximo;
-        this.metricas = new MetricasElevador();
+        this.metricas = new MetricasElevador();                                     // Inicializa métricas
         this.tempoUltimaAtualizacao = 0;
         this.estavaParado = true;
         System.out.println("Elevador " + id + " criado. Andar máximo: " + andarMaximo);
@@ -39,48 +39,46 @@ public class Elevador extends EntidadeSimulavel {
 
     @Override
     public void atualizar(int minutoSimulado) {
-        /* ───  dwell após embarque no térreo ─────── */
+        // Dwell após embarque no térreo
         if (aguardandoPartidaDoTerreo) {
             System.out.printf("Elevador %d está no andar 0 com %d passageiros. Fechando portas…%n",
                     id, getQuantidadePassageiros());
             metricas.adicionarTempoParado(1);
             aguardandoPartidaDoTerreo = false;
             tempoUltimaAtualizacao = minutoSimulado;
-            return;                      // não se move neste ciclo
+            return;
         }
 
-        /* ───  tratamento de pausa de desembarque ─ */
+        // Tratamento de pausa para desembarque
         if (pausaRestante > 0) {
-            desembarcarUmPassageiro(minutoSimulado);
+            desembarcarUmPassageiro(minutoSimulado);                                // Desembarque um passageiro
             pausaRestante--;
             metricas.adicionarTempoParado(1);
             return;
         }
 
-        /* ───  verificar se há novos desembarques ─ */
+        // Verifica se há novos passageiros para desembarcar
         if (!emDesembarque) {
             passageirosParaDesembarcar = contarPassageirosDoAndarAtual();
             if (passageirosParaDesembarcar > 0) {
-                pausaRestante = passageirosParaDesembarcar;    // 1 min por passageiro
+                pausaRestante = passageirosParaDesembarcar;
                 emDesembarque = true;
-                System.out.printf(
-                        "Elevador %d está aguardando %d passageiro(s) desembarcar(em) no andar %d%n",
-                        id, passageirosParaDesembarcar, andarAtual
-                );
-                metricas.adicionarTempoParado(1);              // já conta o 1º minuto
+                System.out.printf("Elevador %d está aguardando %d passageiro(s) desembarcar(em) no andar %d%n",
+                        id, passageirosParaDesembarcar, andarAtual);
+                metricas.adicionarTempoParado(1);
                 return;
             }
         }
         emDesembarque = false;
 
-        /* ───  atualizar métricas de energia/tempo ─ */
+        // Atualiza métricas
         int tempoDecorrido = minutoSimulado - (int) tempoUltimaAtualizacao;
         if (getQuantidadePassageiros() == 0 && andarAtual == 0) {
-            metricas.adicionarTempoParado(tempoDecorrido);
+            metricas.adicionarTempoParado(tempoDecorrido);                          // Parado vazio no térreo
             estavaParado = true;
         } else {
             if (estavaParado) {
-                metricas.incrementarViagens();
+                metricas.incrementarViagens();                                      // Começo de nova viagem
                 estavaParado = false;
             }
             metricas.adicionarEnergiaGasta(calcularEnergiaGasta(tempoDecorrido));
@@ -89,8 +87,7 @@ public class Elevador extends EntidadeSimulavel {
 
         tempoUltimaAtualizacao = minutoSimulado;
 
-        /* ───  mover elevador ────────────────────── */
-        mover();
+        mover();                                                                     // Move o elevador
     }
 
     private void desembarcarUmPassageiro(int minutoAtual) {
@@ -113,7 +110,7 @@ public class Elevador extends EntidadeSimulavel {
                 if (atual.getProximo() == null) {
                     passageiros.setFim(anterior);
                 }
-                return;         // só um passageiro por ciclo
+                return;
             }
             anterior = atual;
             atual = atual.getProximo();
@@ -143,7 +140,6 @@ public class Elevador extends EntidadeSimulavel {
             metricas.incrementarPessoasTransportadas();
             System.out.println("Pessoa " + pessoa.getId() + " entrou no Elevador " + id);
 
-            /* ─── marca dwell se for no térreo ─────── */
             if (andarAtual == 0) {
                 aguardandoPartidaDoTerreo = true;
             }
@@ -186,46 +182,29 @@ public class Elevador extends EntidadeSimulavel {
     }
 
     private void mover() {
-
-    /* ────────────────────────────────────────────────
-       1) ELEVADOR VAZIO → deve retornar ao térreo
-       ────────────────────────────────────────────────*/
         if (getQuantidadePassageiros() == 0) {
-
-            // Se ainda não está no térreo, desce um andar
             if (andarAtual > 0) {
                 subindo = false;
                 andarAtual--;
             }
-
-            // Chegou vazio ao térreo: reseta direção para cima e sai
             if (andarAtual == 0) {
                 subindo = true;
                 System.out.println("Elevador " + id +
                         " chegou vazio ao térreo. Pronto para nova viagem.");
-                return;   // evita imprimir log “Descendo” parado no 0
+                return;
             }
-
-    /* ────────────────────────────────────────────────
-       2) ELEVADOR COM PASSAGEIROS
-       ────────────────────────────────────────────────*/
         } else {
-
-            //detector do numero de viagens
-            if (!emViagem && andarAtual ==0){
-               emViagem = true;
-               metricas.incrementarViagens(); // contagem das viagens
+            if (!emViagem && andarAtual == 0) {
+                emViagem = true;
+                metricas.incrementarViagens();
             }
 
-
-            // Inverte direção nos extremos
             if (subindo && andarAtual == andarMaximo) {
                 subindo = false;
             } else if (!subindo && andarAtual == 0) {
                 subindo = true;
             }
 
-            // Move um andar conforme a direção
             if (subindo) {
                 andarAtual++;
             } else {
@@ -233,9 +212,6 @@ public class Elevador extends EntidadeSimulavel {
             }
         }
 
-    /* ────────────────────────────────────────────────
-       Log
-       ────────────────────────────────────────────────*/
         System.out.println("Elevador " + id + " está no andar " + andarAtual +
                 " com " + getQuantidadePassageiros() + " passageiros. " +
                 (subindo ? "Subindo ↑" : "Descendo ↓"));

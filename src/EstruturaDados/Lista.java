@@ -1,59 +1,58 @@
 package EstruturaDados;
 
-public class Lista {
-    private Ponteiro inicio;
-    private Ponteiro fim;
+public class Lista {                                       // Implementação de uma lista encadeada simples
+    private Ponteiro inicio;                               // Ponteiro para o primeiro elemento da lista
+    private Ponteiro fim;                                  // Ponteiro para o último elemento da lista
 
-    public int tamanho() { //fazer a contagem do numero de pessoas nos andares
+    public int tamanho() {                                 // Retorna o número de elementos na lista
         int count = 0;
         Ponteiro p = getInicio();
         while (p != null) {
-            count++;
-            p = p.getProximo();
+            count++;                                       // Incrementa o contador para cada nó encontrado
+            p = p.getProximo();                            // Avança para o próximo nó
         }
-        return count;
+        return count;                                      // Retorna o total de elementos
     }
 
-    public Lista() {
+    public Lista() {                                       // Construtor: inicializa a lista vazia
         inicio = null;
         fim = null;
     }
 
-    public void inserirFim(Object elemento) {
-        Ponteiro novo = new Ponteiro(elemento);
-        if (inicio == null) {
-            inicio = novo;
+    public void inserirFim(Object elemento) {              // Insere um novo elemento no final da lista
+        Ponteiro novo = new Ponteiro(elemento);            // Cria novo nó com o elemento fornecido
+        if (inicio == null) {                              // Caso a lista esteja vazia
+            inicio = novo;                                 // Novo elemento se torna o início
         } else {
-            fim.setProximo(novo);
+            fim.setProximo(novo);                          // Liga o antigo fim ao novo nó
         }
-        fim = novo;
+        fim = novo;                                        // Atualiza o ponteiro de fim para o novo nó
     }
 
-    public Object getElementoNaPosicao(int posicao) {
+    public Object getElementoNaPosicao(int posicao) {      // Retorna o elemento na posição indicada (base 0)
         int contador = 0;
         Ponteiro atual = inicio;
 
         while (atual != null) {
-            if (contador == posicao) {
-                return atual.getElemento();
+            if (contador == posicao) {                     // Quando a posição for encontrada
+                return atual.getElemento();                // Retorna o elemento do nó
             }
-            atual = atual.getProximo();
-            contador++;
+            atual = atual.getProximo();                    // Vai para o próximo nó
+            contador++;                                    // Incrementa o contador de posição
         }
 
-        return null; // se não encontrar
+        return null;                                       // Retorna null se a posição não existir na lista
     }
 
-
-    public Ponteiro getInicio() {
+    public Ponteiro getInicio() {                          // Getter para o primeiro nó da lista
         return inicio;
     }
 
-    public void setInicio(Ponteiro novoInicio) {
+    public void setInicio(Ponteiro novoInicio) {           // Setter para redefinir o início da lista
         this.inicio = novoInicio;
     }
 
-    public void setFim(Ponteiro novoFim) {
+    public void setFim(Ponteiro novoFim) {                 // Setter para redefinir o fim da lista
         this.fim = novoFim;
     }
 }

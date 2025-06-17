@@ -7,67 +7,67 @@ import Simulacao.PainelElevador;
 
 import java.io.Serializable;
 
-public class Andar implements Serializable {
-    private int numero;
-    private Fila pessoasAguardando; //estão esperando levador
-    private PainelElevador painel;
-    private Lista pessoasPresentes; //pessoas que estão "trabalhando no andar"
+public class Andar implements Serializable {                                        // Representa um andar do prédio na simulação
+    private int numero;                                                            // Número identificador do andar
+    private Fila pessoasAguardando;                                                // Fila de pessoas aguardando o elevador
+    private PainelElevador painel;                                                 // Painel com botões de chamada do elevador
+    private Lista pessoasPresentes;                                                // Lista de pessoas presentes no andar (trabalhando)
 
     public Andar(int numero) {
-        this.numero = numero;
-        this.pessoasAguardando = new Fila();
-        this.painel = new PainelElevador();
-        this.pessoasPresentes = new Lista();
+        this.numero = numero;                                                      // Define o número do andar
+        this.pessoasAguardando = new Fila();                                       // Inicializa a fila de espera
+        this.painel = new PainelElevador();                                        // Inicializa o painel do andar
+        this.pessoasPresentes = new Lista();                                       // Inicializa a lista de pessoas no andar
     }
 
-    public int getNumero() {
+    public int getNumero() {                                                       // Retorna o número do andar
         return numero;
     }
 
-    public Fila getPessoasAguardando() {
+    public Fila getPessoasAguardando() {                                           // Retorna a fila de espera por elevador
         return pessoasAguardando;
     }
 
-    public Lista getPessoasPresentes() { //é pra ser as pessoas no andar!
+    public Lista getPessoasPresentes() {                                           // Retorna a lista de pessoas no andar
         return pessoasPresentes;
     }
 
-    public PainelElevador getPainel() {
+    public PainelElevador getPainel() {                                            // Retorna o painel de chamadas
         return painel;
     }
 
-    public void adicionarPessoa(Pessoa pessoa, int minutoAtual) {
+    public void adicionarPessoa(Pessoa pessoa, int minutoAtual) {                  // Adiciona pessoa à fila de espera com base na prioridade
         if (pessoa.isPrioritaria()) {
-            pessoasAguardando.enfileirarPrioritario(pessoa);
+            pessoasAguardando.enfileirarPrioritario(pessoa);                       // Enfileira prioritariamente (idoso, cadeirante, etc.)
         } else {
-            pessoasAguardando.enfileirar(pessoa);
+            pessoasAguardando.enfileirar(pessoa);                                  // Enfileira normalmente
         }
-        painel.registrarChamada(pessoa.getAndarDestino());
+        painel.registrarChamada(pessoa.getAndarDestino());                         // Registra chamada no painel para o destino da pessoa
         System.out.println("Pessoa " + pessoa.getId() +
                 (pessoa.isPrioritaria() ? " (PRIORIDADE)" : "") +
                 " adicionada no andar " + numero + " com destino ao " +
                 pessoa.getAndarDestino());
     }
 
-    public void embarcarPessoas(Elevador elevador, int minutoAtual) {
+    public void embarcarPessoas(Elevador elevador, int minutoAtual) {              // Embarca pessoas na direção do elevador
         Ponteiro atual = pessoasAguardando.getInicio();
 
         while (atual != null && elevador.getCapacidadeDisponivel() > 0) {
             Pessoa pessoa = (Pessoa) atual.getElemento();
 
             boolean mesmaDirecao = (elevador.isSubindo() && pessoa.getAndarDestino() > numero) ||
-                    (!elevador.isSubindo() && pessoa.getAndarDestino() < numero);
+                    (!elevador.isSubindo() && pessoa.getAndarDestino() < numero); // Verifica se o destino da pessoa está na mesma direção do elevador
 
             if (pessoa.getAndarOrigem() == numero && mesmaDirecao) {
-                elevador.adicionarPassageiro(pessoa, minutoAtual);
-                pessoasAguardando.desenfileirar();
+                elevador.adicionarPassageiro(pessoa, minutoAtual);                // Adiciona ao elevador
+                pessoasAguardando.desenfileirar();                                // Remove da fila
             }
 
-            atual = atual.getProximo();
+            atual = atual.getProximo();                                           // Vai para a próxima pessoa
         }
 
         if (pessoasAguardando.estaVazia()) {
-            painel.limparChamadas();
+            painel.limparChamadas();                                              // Limpa chamadas do painel se fila estiver vazia
         }
     }
 
@@ -80,14 +80,14 @@ public class Andar implements Serializable {
             Ponteiro proximo = atual.getProximo();
 
             if (pessoa.getAndarDestino() == destino && pessoa.getAndarOrigem() == this.numero) {
-                elevador.adicionarPassageiro(pessoa, minutoAtual);
+                elevador.adicionarPassageiro(pessoa, minutoAtual);                // Adiciona ao elevador
                 if (anterior == null) {
-                    pessoasAguardando.setInicio(proximo);
+                    pessoasAguardando.setInicio(proximo);                         // Remove do início da fila
                 } else {
-                    anterior.setProximo(proximo);
+                    anterior.setProximo(proximo);                                 // Remove do meio/fim da fila
                 }
                 if (proximo == null) {
-                    pessoasAguardando.setFim(anterior);
+                    pessoasAguardando.setFim(anterior);                           // Atualiza o ponteiro de fim
                 }
             } else {
                 anterior = atual;
@@ -97,18 +97,17 @@ public class Andar implements Serializable {
         }
 
         if (pessoasAguardando.estaVazia()) {
-            painel.limparChamadas();
+            painel.limparChamadas();                                              // Limpa o painel se não restarem pessoas
         }
     }
 
     public void registrarChegadaDePassageiro(Pessoa pessoa, int minutoAtual) {
-        pessoa.registrarTempoChegada(minutoAtual);
-        pessoasPresentes.inserirFim(pessoa);
+        pessoa.registrarTempoChegada(minutoAtual);                                // Marca o tempo de chegada da pessoa no andar
+        pessoasPresentes.inserirFim(pessoa);                                      // Adiciona à lista de presentes no andar
         System.out.println("Pessoa " + pessoa.getId() + " está temporariamente no andar " + numero);
     }
 
-
-    public void processarRetornoParaTerreo(int minutoAtual) {
+    public void processarRetornoParaTerreo(int minutoAtual) {                     // Verifica quem está há 3 minutos ou mais no andar para retornar ao térreo
         Ponteiro atual = pessoasPresentes.getInicio();
         Ponteiro anterior = null;
 
@@ -116,28 +115,27 @@ public class Andar implements Serializable {
             Pessoa pessoa = (Pessoa) atual.getElemento();
             Ponteiro proximo = atual.getProximo();
 
-            if (minutoAtual - pessoa.getTempoChegada() >= 3) { // ficou 3 minutos no andar
+            if (minutoAtual - pessoa.getTempoChegada() >= 3) {                    // Fica no andar por 3 minutos
                 pessoa.setAndarOrigem(numero);
-                pessoa.setAndarDestino(0); // térreo
-                adicionarPessoa(pessoa, minutoAtual); // volta para a fila de espera
-                painel.registrarChamada(0);
+                pessoa.setAndarDestino(0);                                        // Define destino como térreo
+                adicionarPessoa(pessoa, minutoAtual);                             // Coloca novamente na fila de espera
+                painel.registrarChamada(0);                                       // Registra chamada para o térreo
                 System.out.println("Pessoa " + pessoa.getId() + " quer retornar ao térreo.");
 
-                // remove da lista de pessoas presentes
                 if (anterior == null) {
-                    pessoasPresentes.setInicio(proximo);
+                    pessoasPresentes.setInicio(proximo);                          // Remove do início da lista
                 } else {
-                    anterior.setProximo(proximo);
+                    anterior.setProximo(proximo);                                 // Remove do meio/fim
                 }
 
                 if (proximo == null) {
-                    pessoasPresentes.setFim(anterior);
+                    pessoasPresentes.setFim(anterior);                            // Atualiza ponteiro de fim
                 }
             } else {
                 anterior = atual;
             }
 
-            atual = proximo;
+            atual = proximo;                                                      // Avança para a próxima pessoa
         }
     }
 }
