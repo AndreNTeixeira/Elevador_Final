@@ -32,6 +32,10 @@ public class Predio extends EntidadeSimulavel {
         while (p != null) {                                // Percorre todos os andares
             Andar a = (Andar) p.getElemento();             // Converte elemento para Andar
             a.processarRetornoParaTerreo(minutoSimulado); // Processa chamadas de retorno para o térreo
+
+            int totalPresentes = contarPresentes(a);
+           // System.out.printf("⏱️ Minuto %d - Andar %d: %d pessoa(s) presentes.%n",
+           //         minutoSimulado, a.getNumero(), totalPresentes);
             p = p.getProximo();                            // Vai para o próximo andar
         }
 
@@ -47,6 +51,17 @@ public class Predio extends EntidadeSimulavel {
     public Lista getAndares() {
         return andares;
     }
+
+    private int contarPresentes(Andar andar) {
+        int count = 0;
+        Ponteiro p = andar.getPessoasPresentes().getInicio();
+        while (p != null) {
+            count++;
+            p = p.getProximo();
+        }
+        return count;
+    }
+
 
     // Retorna um andar específico pelo número
     public Andar getAndar(int numero) {

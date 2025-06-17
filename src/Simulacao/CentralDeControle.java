@@ -20,7 +20,9 @@ public class CentralDeControle extends EntidadeSimulavel {                      
         this.heuristica = heur;                                                  // Define a heurística usada
         elevadores = new Lista();                                                // Inicializa a lista de elevadores
         for (int i = 0; i < quantidadeElevadores; i++) {
-            elevadores.inserirFim(new Elevador(i + 1, andarMaximo));            // Cria e adiciona elevadores na lista
+            Elevador elevador = new Elevador(i + 1, andarMaximo);
+            elevador.setCentral(this);
+            elevadores.inserirFim(elevador);
         }
     }
 
@@ -97,7 +99,7 @@ public class CentralDeControle extends EntidadeSimulavel {                      
         }
     }
 
-    private Andar getAndar(int numero) {
+    public Andar getAndar(int numero) {
         Ponteiro p = andares.getInicio();                                      // Itera sobre a lista de andares
         while (p != null) {
             Andar a = (Andar) p.getElemento();                                 // Recupera o objeto Andar

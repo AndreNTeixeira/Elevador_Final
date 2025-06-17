@@ -1,5 +1,7 @@
 package EstruturaDados;
 
+import Simulacao.CentralDeControle;
+
 public class Lista {                                       // Implementação de uma lista encadeada simples
     private Ponteiro inicio;                               // Ponteiro para o primeiro elemento da lista
     private Ponteiro fim;                                  // Ponteiro para o último elemento da lista
@@ -54,5 +56,8 @@ public class Lista {                                       // Implementação de
 
     public void setFim(Ponteiro novoFim) {                 // Setter para redefinir o fim da lista
         this.fim = novoFim;
+    }
+
+    public void setCentral(CentralDeControle centralDeControle) {
     }
 }

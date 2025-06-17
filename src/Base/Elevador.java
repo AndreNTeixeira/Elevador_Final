@@ -4,6 +4,7 @@ import EstruturaDados.Lista;
 import EstruturaDados.Ponteiro;
 import Metricas.MetricasElevador;
 import Simulacao.EntidadeSimulavel;
+import Simulacao.CentralDeControle;
 
 public class Elevador extends EntidadeSimulavel {                                   // Representa um elevador dentro da simulação
     private int id;                                                                 // Identificador do elevador
@@ -11,7 +12,9 @@ public class Elevador extends EntidadeSimulavel {                               
     private int capacidadeMaxima = 8;                                               // Capacidade máxima de passageiros
     private int andarMaximo;                                                        // Andar mais alto que o elevador pode alcançar
     private boolean subindo = true;                                                 // Direção atual do elevador
-    private Lista passageiros = new Lista();                                        // Lista de passageiros dentro do elevador
+    private Lista passageiros = new Lista();
+    private CentralDeControle central;// Lista de passageiros dentro do elevador
+
 
     /* ─── Pausa de desembarque ────────────────────── */
     private int pausaRestante = 0;                                                  // Tempo restante de pausa para desembarque
@@ -102,6 +105,13 @@ public class Elevador extends EntidadeSimulavel {                               
                 System.out.printf("Pessoa %d saiu no andar %d do Elevador %d%n",
                         p.getId(), andarAtual, id);
 
+                if (central != null) {
+                    Andar andar = central.getAndar(andarAtual);
+                    if (andar != null) {
+                        andar.registrarChegadaDePassageiro(p, minutoAtual);
+                    }
+                }
+
                 if (anterior == null) {
                     passageiros.setInicio(atual.getProximo());
                 } else {
@@ -129,6 +139,10 @@ public class Elevador extends EntidadeSimulavel {                               
         int consumoBase = 1;
         int consumoPorPassageiro = 1;
         return tempoDecorrido * (consumoBase + consumoPorPassageiro * getQuantidadePassageiros());
+    }
+
+    public void setCentral(CentralDeControle central) {
+        this.central = central;
     }
 
     public void adicionarPassageiro(Pessoa pessoa, int minutoAtual) {
