@@ -116,7 +116,7 @@ public class Andar implements Serializable {                                    
             Pessoa pessoa = (Pessoa) atual.getElemento();
             Ponteiro proximo = atual.getProximo();
 
-            if (minutoAtual - pessoa.getTempoChegada() >= 150) {                    // Fica no andar por 3 minutos
+            if (minutoAtual - pessoa.getTempoChegada() >= 3) {                    // Fica no andar por 3 minutos
                 pessoa.setAndarOrigem(numero);
                 pessoa.setAndarDestino(0);                                        // Define destino como térreo
                 adicionarPessoa(pessoa, minutoAtual);                             // Coloca novamente na fila de espera

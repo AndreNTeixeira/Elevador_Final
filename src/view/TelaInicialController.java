@@ -299,15 +299,35 @@ public class TelaInicialController {
         pessoasPorAndarVBox.setSpacing(5);
         pessoasPorAndarVBox.getChildren().clear();
         for (int andar = 0; andar < totalAndares; andar++) {
-            int qtd = contarPessoasNoAndar(andar);
-            Label label = new Label(String.format("\uD83E\uDDD1\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1 %d", qtd));
+            int presentes = contarPessoasNoAndar(andar);
+            int aguardando = contarAguardandoNoAndar(andar);
+            Label label = new Label(String.format("\uD83E\uDDD1\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1 %d | ⏳ %d", presentes, aguardando));
             label.setMinHeight(40); // altura da célula
             label.setPrefHeight(40);
-            label.setStyle("-fx-font-size: 18px; -fx-text-fill: black;");
+            label.setMinWidth(120);
+            label.setPrefWidth(120);
+            label.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
             pessoasPorAndarVBox.getChildren().add(0, label); // adiciona no topo
         }
-
         labelTempo.setText(String.format("%02d:%02d:%02d", horas, minutos, 0));
+    }
+
+    private int contarAguardandoNoAndar(int numero) {
+        Ponteiro p = simulador.getPredio().getAndares().getInicio();
+        while (p != null) {
+            Base.Andar andar = (Base.Andar) p.getElemento();
+            if (andar.getNumero() == numero) {
+                int count = 0;
+                Ponteiro pessoa = andar.getPessoasAguardando().getInicio();
+                while (pessoa != null) {
+                    count++;
+                    pessoa = pessoa.getProximo();
+                }
+                return count;
+            }
+            p = p.getProximo();
+        }
+        return 0;
     }
 
     private int contarPessoasNoAndar(int numero) {
